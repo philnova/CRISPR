@@ -1,4 +1,6 @@
 
+import sys, getopt
+
 class GuideRNA(object):
 	def __init__(self, sequence, start_coord, end_coord, chromosome_num):
 		"""Basic class to represent and score guide RNAs"""
@@ -31,8 +33,8 @@ def scan_chromosome(chromosome, start_coord, output_file):
 	chromosome_string = chromosome[1]
 	guide_RNA = []
 
-	for char_idx, char in enumerate(chromosome[1]): #actual chromosomal content is second item in list
-		if char_idx - 21 >= 0: #make sure we don't go outside the text
+	for char_idx, char in enumerate(chromosome_string): #actual chromosomal content is second item in list
+		if char_idx - 21 >= 0 and char_idx <= len(chromosome_string)-2: #make sure we don't go outside the text
 			if char.upper() == chromosome_string[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
 				try:
 					guide = chromosome_string[char_idx-21:char_idx+2]
@@ -58,15 +60,13 @@ def fasta_to_chrom_string(filename):
 		chrm.append(chrm_string)
 	return chrm
 
-guides = scan_chromosome(fasta_to_chrom_string('chrm22_edited.txt'), 16050001, 'guide_test.txt')
+guides = scan_chromosome(fasta_to_chrom_string("C:\Users\Phil\Desktop\Genome\chr1_noN.txt"), 10001, 'chr1_F_guides.txt')
 
-def output_guides(guide_list, filename):
-	"""Deprecated"""
-	with open(filename, 'w') as fo:
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'N_COUNT'+'\t'+'N_LOWERCASE')
-		for guide in guide_list:
-			fo.write('chr'+guide.chromosome_num+'\t'+guide.range[0]+'\t'+guide.range[1]+'\t'+guide.sequence+'\t'+guide.nscore+'\t'+guide.lowerscore+'\n')
+def main(argv):
+	inputfile, chrm_start, outputfile = argv[1::] #first element in argv is the script name; don't want this
+	scan_chromosome(fasta_to_chrom_string(inputfile). chrm_start, outputfile)
 
-	return
+if __name__ == "__main__":
+	main(sys.argv[1:])
+	#example: python find_guideRNA.py "C:\Users\Phil\Desktop\Genome\chr1_noN.txt" 10001 'chr1_F_guides.txt'
 
-#output_guides(guides, 'guide_test.txt')
