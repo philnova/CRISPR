@@ -64,7 +64,7 @@ guides = scan_chromosome(fasta_to_chrom_string("C:\Users\Phil\Desktop\Genome\chr
 
 def main(argv):
 	inputfile, chrm_start, outputfile = argv[1::] #first element in argv is the script name; don't want this
-	scan_chromosome(fasta_to_chrom_string(inputfile). chrm_start, outputfile)
+	scan_chromosome(fasta_to_chrom_string(inputfile), chrm_start, outputfile)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
