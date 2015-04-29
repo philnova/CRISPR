@@ -1,9 +1,55 @@
+"""
+Set of tools to pull out pairs of short human and chimp HARs and
+extend both along their orthologous long HARs.
+
+Each short human HAR will be extended the exact same amount as the
+corresponding short chimp HAR, until both strings have at least
+171 bases (in addition to however many escape characters are picked
+up during traversal).
+"""
+
+
+
+##########################################
+################ GLOBALS #################
+##########################################
+
+
+
 import random
+
+FILENAME_SHORT = "HAR_information_table.txt"
+FILENAME_LONG = "Extended_HAR_information_table.txt"
+OUTPUT = "test.txt"
+
+# N.B. the following HARs are in the Extended file but not the short file:
+# 2xHAR.521
+# 2xHAR.387
+# 2xHAR.169
+# 2xHAR.538
+# All HARs in the short file are in the extended file
+
+
+
+##########################################
+################ HELPERS #################
+##########################################
+
+
+
+def harfile_parse(filename):
+	filedict = {}
+	with open(filename) as fo:
+		for line in fo:
+			filedict[line.split()[0]] = line.split()[1::]
+	return filedict
+
 
 def create_string(length, dash_prob = 0.1):
 	initial = [random.choice(['A', 'G', 'C', 'T']) for dummy in range(length)]
 	modified = [i if random.random() > dash_prob else '-' for i in initial]
 	return ''.join(modified)
+
 
 def len_without_dashes(string):
 	counter = 0
@@ -15,6 +61,7 @@ def len_without_dashes(string):
 			#dash_counter += 1
 	return counter #, dash_counter
 
+
 def check_repeat(string, repeat_tolerance = 8, check_from = "left"):
 	if check_from == "right":
 		string = "".join([i for i in reversed(string)])
@@ -24,12 +71,20 @@ def check_repeat(string, repeat_tolerance = 8, check_from = "left"):
 
 	i = 1
 	while i < repeat_tolerance:
-		if string[i] == string[i-1]:
+		if string[i] == string[i-1] and not string[i] == "-":
 			pass
 		else:
 			return False
 		i+=1
 	return True
+
+
+
+##########################################
+############### STRUCTURES ###############
+##########################################
+
+
 
 class Oligo(object):
 
@@ -47,6 +102,8 @@ class Oligo(object):
 		extend_left, extend_right = True, True
 		self.extension_left, self.extension_right = 0, 0
 		self.gaps_left, self.gaps_right = 0, 0
+
+		error_message = ""
 
 		#march outward on both sides
 		while len_without_dashes(self.left_string + self.string + self.right_string) < target_length:
@@ -82,23 +139,29 @@ class Oligo(object):
 			if extend_left:
 				if self.substring_start == 1:
 					extend_left = False
+					error_message += "reached far left "
 
 				if self.gaps_left <= gap_tolerance:
 					extend_left = not check_repeat(self.left_string, repeat_tolerance, "left")
 				else:
 					extend_left = False
+					error_message += "too many gaps on left "
 
 			if extend_right:
 				if self.substring_end == len(self.longer_string) - 1:
 					extend_right = False
+					error_message += "reached far right "
 
 				if self.gaps_left <= gap_tolerance:
 					extend_right = not check_repeat(self.right_string, repeat_tolerance, "right")
 				else:
 					extend_right = False
+					error_message += "too many gaps on right "
 
 			if not extend_left and not extend_right:
 				print "No further extension possible"
+				print error_message
+				print self.gaps_left, self.gaps_right
 				break
 
 		self.extended_string = self.left_string + self.string + self.right_string
@@ -129,7 +192,7 @@ class Oligo(object):
 
 		self.extended_string = new_left_string + self.extended_string + new_right_string
 
-		
+
 class OligoPair(object):
 
 	def __init__(self, oligo1, oligo2):
@@ -151,7 +214,7 @@ class OligoPair(object):
 			diff_left = self.oligo1.extension_left - self.oligo2.extension_left
 			diff_right = self.oligo1.extension_right - self.oligo2.extension_right
 
-			assert (diff_left > 0 and diff_right > 0) or (diff_left < 0 and diff_right < 0)
+			#assert (diff_left > 0 and diff_right > 0) or (diff_left < 0 and diff_right < 0)
 			#assert diff == (self.oligo1.gaps_left - self.oligo2.gaps_left) + (self.oligo1.gaps_right - self.oligo2.gaps_right)
 
 			if diff > 0:
@@ -164,33 +227,58 @@ class OligoPair(object):
 
 		return self.oligo1.extended_string, self.oligo2.extended_string
 
+def extend(input_short, input_long, output, target_length):
+	shortfile = harfile_parse(FILENAME_SHORT)
+	longfile = harfile_parse(FILENAME_LONG)
 
-def file_parse(filename):
-	pass
+	for key in shortfile.keys():
 
-def main(input_filename, output_filename):
-	pass
+		humanshort, humanlong = shortfile[key][2], longfile[key][2]
+		chimpshort, chimplong = shortfile[key][5], longfile[key][5]
+
+		olig_human = Oligo(humanshort, humanlong)
+		olig_chimp = Oligo(chimpshort, chimplong)
+
+		olig_pair = OligoPair(olig_human, olig_chimp)
+		longer_human, longer_chimp = olig_pair.paired_extend(target_length)
+		print longer_human
+		print longer_chimp
+	return
+
+
+		
+
+##########################################
+################## MAIN ##################
+##########################################
+
+
+
+def main(input_short, input_long, output, target_length = 171):
+	extend(input_short, input_long, output, target_length)
 
 if __name__ == "__main__":
-	long_string1, long_string2 = create_string(400), create_string(400)
-	short_string1, short_string2 = long_string1[100:250], long_string2[100:250]
+	main(FILENAME_SHORT, FILENAME_LONG, OUTPUT)
 
-	o1 = Oligo(short_string1, long_string1)
-	o2 = Oligo(short_string2, long_string2)
+	# long_string1, long_string2 = create_string(400), create_string(400)
+	# short_string1, short_string2 = long_string1[100:250], long_string2[100:250]
+
+	# o1 = Oligo(short_string1, long_string1)
+	# o2 = Oligo(short_string2, long_string2)
 	
-	op = OligoPair(o1, o2)
-	op.paired_extend(171)
+	# op = OligoPair(o1, o2)
+	# op.paired_extend(171)
 
-	#print op.oligo1.extended_string
-	#print op.oligo2.extended_string
+	# #print op.oligo1.extended_string
+	# #print op.oligo2.extended_string
 
-	#print op.oligo1.extended_string
-	#print len(op.oligo1.extended_string) - op.oligo1.gaps_left - op.oligo1.gaps_right
-	#print op.oligo1.gaps_left, op.oligo1.gaps_right
-	print len_without_dashes(op.oligo1.extended_string), len_without_dashes(op.oligo2.extended_string)
-	print op.oligo1.extend_left, op.oligo1.extend_right
+	# #print op.oligo1.extended_string
+	# #print len(op.oligo1.extended_string) - op.oligo1.gaps_left - op.oligo1.gaps_right
+	# #print op.oligo1.gaps_left, op.oligo1.gaps_right
+	# print len_without_dashes(op.oligo1.extended_string), len_without_dashes(op.oligo2.extended_string)
+	# print op.oligo1.extend_left, op.oligo1.extend_right
 
-	print len(op.oligo1.extended_string), len(op.oligo2.extended_string)
+	# print len(op.oligo1.extended_string), len(op.oligo2.extended_string)
 
 
 
