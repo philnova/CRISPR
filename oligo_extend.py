@@ -93,7 +93,7 @@ class Oligo(object):
 		self.length = len(self.string)
 		self.longer_string = longer_string
 
-	def extend(self, target_length = 171, repeat_tolerance = 8, escape_chars = {"-" : 1}, gap_tolerance = 25):
+	def extend(self, target_length = 171, repeat_tolerance = 8, escape_chars = {"-" : 1}, gap_tolerance = 100):
 		self.substring_start = self.longer_string.find(self.string)
 		self.substring_end = self.substring_start + self.length
 
@@ -141,7 +141,7 @@ class Oligo(object):
 					extend_left = False
 					error_message += "reached far left "
 
-				if self.gaps_left <= gap_tolerance:
+				if self.gaps_left < gap_tolerance:
 					extend_left = not check_repeat(self.left_string, repeat_tolerance, "left")
 				else:
 					extend_left = False
@@ -152,7 +152,7 @@ class Oligo(object):
 					extend_right = False
 					error_message += "reached far right "
 
-				if self.gaps_left <= gap_tolerance:
+				if self.gaps_left < gap_tolerance:
 					extend_right = not check_repeat(self.right_string, repeat_tolerance, "right")
 				else:
 					extend_right = False
@@ -162,7 +162,11 @@ class Oligo(object):
 				print "No further extension possible"
 				print error_message
 				print self.gaps_left, self.gaps_right
-				break
+				
+				self.extended_string = self.left_string + self.string + self.right_string
+				self.extend_left, self.extend_right = False, False
+
+				return
 
 		self.extended_string = self.left_string + self.string + self.right_string
 
