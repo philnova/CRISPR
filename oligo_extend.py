@@ -17,6 +17,8 @@ up during traversal).
 
 
 import random
+import sys
+import getopt
 
 DASH_TOLERANCE = 25 #total number of dashes allowed on one side of the extension
 REPEAT_TOLERANCE = 8
@@ -75,7 +77,7 @@ def len_without_dashes(string):
 	return counter #, dash_counter
 
 
-def check_repeat(string, repeat_tolerance = 8, check_from = "left"):
+def check_repeat(string, repeat_tolerance = 1000, check_from = "left"):
 	if check_from == "right":
 		string = "".join([i for i in reversed(string)])
 
@@ -144,24 +146,24 @@ class OligoPair(object):
 				break
 
 			if oligo1.extend_left and oligo2.extend_left:
-				current_char_1 = oligo1.longer_string[oligo1.substring_start - 1]
-				current_char_2 = oligo2.longer_string[oligo2.substring_start - 1]
+				current_char_l1 = oligo1.longer_string[oligo1.substring_start - 1]
+				current_char_l2 = oligo2.longer_string[oligo2.substring_start - 1]
 				
-				if not current_char_1 in escape_chars.keys():
+				if not current_char_l1 in escape_chars.keys():
 					oligo1.extension_left += 1
 				else:
 					oligo1.gaps_left += 1 #escape_chars[current_char]
 
-				if not current_char_2 in escape_chars.keys():
+				if not current_char_l2 in escape_chars.keys():
 					oligo2.extension_left += 1
 				else:
 					oligo2.gaps_left += 1
 
 				
-				oligo1.left_string = current_char_1 + oligo1.left_string
+				oligo1.left_string = current_char_l1 + oligo1.left_string
 				oligo1.substring_start -= 1
 
-				oligo2.left_string = current_char_2 + oligo2.left_string
+				oligo2.left_string = current_char_l2 + oligo2.left_string
 				oligo2.substring_start -= 1
 
 				if oligo1.substring_start == 1:
@@ -190,23 +192,23 @@ class OligoPair(object):
 
 			if oligo1.extend_right and oligo2.extend_right:
 
-				current_char_1 = oligo1.longer_string[oligo1.substring_end]
-				current_char_1 = oligo2.longer_string[oligo2.substring_end]
+				current_char_r1 = oligo1.longer_string[oligo1.substring_end]
+				current_char_r2 = oligo2.longer_string[oligo2.substring_end]
 
-				if not current_char_1 in escape_chars.keys():
+				if not current_char_r1 in escape_chars.keys():
 					oligo1.extension_right += 1
 				else:
 					oligo1.gaps_right += 1 #escape_chars[current_char]
 
-				if not current_char_2 in escape_chars.keys():
+				if not current_char_r2 in escape_chars.keys():
 					oligo2.extension_right += 1
 				else:
 					oligo2.gaps_right += 1
 
-				oligo1.right_string += current_char_1
+				oligo1.right_string += current_char_r1
 				oligo1.substring_end += 1
 
-				oligo2.right_string += current_char_2
+				oligo2.right_string += current_char_r2
 				oligo2.substring_end += 1
 
 				if oligo1.substring_end == len(oligo1.longer_string):
@@ -246,6 +248,7 @@ def mainloop(input_short, input_long, output, target_length, verbose = True, gap
 
 	with open(output, 'w') as fo:
 			fo.write("HAR NAME" + '\t' + "HUMAN SEQ" + '\t' + "BP IN SEQ" + "\t" + "TOTAL LEN" + '\t' + "CHIMP SEQ" '\t' + "BP IN SEQ" + "\t" + "TOTAL LEN" + '\t' + "LOG")
+			fo.write('\n')
 
 	for key in shortfile.keys():
 		
@@ -263,6 +266,7 @@ def mainloop(input_short, input_long, output, target_length, verbose = True, gap
 		with open(output, 'a') as fo:
 			fo.write(key + '\t' + longer_human + '\t' + str(len_without_dashes(longer_human)) + '\t' + str(len(longer_human)) + '\t' + longer_chimp + '\t' + str(len_without_dashes(longer_chimp)) + '\t' + str(len(longer_chimp)) + error_message)
 			fo.write('\n')
+
 		if verbose:
 			print key
 			print longer_human, len_without_dashes(longer_human), len(longer_human)
@@ -277,13 +281,51 @@ def mainloop(input_short, input_long, output, target_length, verbose = True, gap
 ##########################################
 ################## MAIN ##################
 ##########################################
+def main(argv):
+	try:
+		opts, args = getopt.getopt(argv, "s:l:o:t:r:g:v:", ["shortfile=", "longfile=", "output=", "targetlenth=", "repeattolerance=", "gaptolerance=", "verbose="])
 
+		target_length = 171
+		repeattolerance = REPEAT_TOLERANCE
+		gaptolerance = DASH_TOLERANCE
+		verbose = True
+		input_short = FILENAME_SHORT
+		input_long = FILENAME_LONG
+		output = "testfile.txt"
 
-def main(input_short, input_long, output, target_length = 171):
-	mainloop(input_short, input_long, output, target_length)
+		if opts:
+			for opt, arg in opts:
+				if opt in ("-s", "--shortfile"):
+					input_short = arg
+				elif opt in ("-l", "--longfile"):
+					input_long = arg
+				elif opt in ("-o", "--output"):
+					output = arg
+				elif opt in ("-t", "--targetlength"):
+					target_length = int(arg)
+				elif opt in ("-r", "--repeattolerance"):
+					repeattolerance = int(arg)
+				elif opt in ("-g", "--gaptolerance"):
+					gaptolerance = arg
+				elif opt in ("-v", "--verbose"):
+					verbose = bool(int(arg))
+				else:
+					raise ValueError("Error: unrecognized argument flag!")
+						
+		mainloop(input_short, input_long, output, target_length, verbose, gaptolerance, repeattolerance)
+		print "output successful!"
+
+	except getopt.GetoptError:
+		raise ValueError("Error: unrecognized argument flag!")      
+        #usage()                          
+		sys.exit(2)  
+
 
 if __name__ == "__main__":
-	main(FILENAME_SHORT, FILENAME_LONG, OUTPUT)
+	main(sys.argv[1:]) #sys.argv[0] is the name of the script; not useful
+
+# if __name__ == "__main__":
+# 	main(FILENAME_SHORT, FILENAME_LONG, OUTPUT)
 
 	# long_string1, long_string2 = create_string(400), create_string(400)
 	# short_string1, short_string2 = long_string1[100:250], long_string2[100:250]
