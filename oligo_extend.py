@@ -281,6 +281,7 @@ def mainloop(input_short, input_long, output, target_length, verbose = True, gap
 ##########################################
 ################## MAIN ##################
 ##########################################
+
 def main(argv):
 	try:
 		opts, args = getopt.getopt(argv, "s:l:o:t:r:g:v:", ["shortfile=", "longfile=", "output=", "targetlenth=", "repeattolerance=", "gaptolerance=", "verbose="])
@@ -311,7 +312,7 @@ def main(argv):
 					verbose = bool(int(arg))
 				else:
 					raise ValueError("Error: unrecognized argument flag!")
-						
+
 		mainloop(input_short, input_long, output, target_length, verbose, gaptolerance, repeattolerance)
 		print "output successful!"
 
