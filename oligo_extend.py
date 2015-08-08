@@ -184,7 +184,10 @@ class Oligo(object):
 		if amt_left and not self.extend_left:
 			raise ValueError("Cannot extend left")
 		if amt_right and not self.extend_right:
-			raise ValueError("Cannot extend right")
+			#raise ValueError("Cannot extend right")
+			pass
+
+		print "further extend", amt_left, amt_right
 
 		new_left_string, new_right_string = "", ""
 		while amt_left:
@@ -203,9 +206,14 @@ class OligoPair(object):
 		self.oligo1 = oligo1
 		self.oligo2 = oligo2
 
-	def paired_extend(self, target_length):
+	def paired_extend(self, target_length, flag=False):
 		self.oligo1.extend(target_length)
 		self.oligo2.extend(target_length)
+
+		if flag:
+			print self.oligo1.extended_string
+			print self.oligo2.extended_string
+			
 
 		if not len(self.oligo1.extended_string) == len(self.oligo2.extended_string):
 
@@ -217,6 +225,25 @@ class OligoPair(object):
 
 			diff_left = self.oligo1.extension_left - self.oligo2.extension_left
 			diff_right = self.oligo1.extension_right - self.oligo2.extension_right
+
+			if diff_left < 0 and diff_right > 0:
+				if diff > 0:
+					#oligo1 is longer. need to shorten on left side
+					self.oligo1.extended_string = self.oligo1.extended_string[-diff_left:]
+					diff_left = 0
+
+				elif diff < 0:
+					assert 1 == 0
+
+			if diff_right < 0 and diff_left > 0:
+				if diff > 0:
+					assert 1 == 0
+				elif diff < 0:
+					print diff_left, diff_right, diff
+					self.oligo2.extended_string = self.oligo2.extended_string[:diff_right]
+					diff_right = diff - diff_right
+					diff_left = - diff_left
+
 
 			#assert (diff_left > 0 and diff_right > 0) or (diff_left < 0 and diff_right < 0)
 			#assert diff == (self.oligo1.gaps_left - self.oligo2.gaps_left) + (self.oligo1.gaps_right - self.oligo2.gaps_right)
@@ -235,8 +262,10 @@ def extend(input_short, input_long, output, target_length):
 	shortfile = harfile_parse(FILENAME_SHORT)
 	longfile = harfile_parse(FILENAME_LONG)
 
-	for key in shortfile.keys():
+	flag = False
 
+	for key in shortfile.keys():
+		# columns are ordered: HAR name, human coordinates, human length, human seq, chimp coordinates, chimp length, chimp seq
 		humanshort, humanlong = shortfile[key][2], longfile[key][2]
 		chimpshort, chimplong = shortfile[key][5], longfile[key][5]
 
@@ -244,10 +273,29 @@ def extend(input_short, input_long, output, target_length):
 		olig_chimp = Oligo(chimpshort, chimplong)
 
 		olig_pair = OligoPair(olig_human, olig_chimp)
-		longer_human, longer_chimp = olig_pair.paired_extend(target_length)
-		print longer_human
-		print longer_chimp
+		longer_human, longer_chimp = olig_pair.paired_extend(target_length, flag)
+
+		longer_human, longer_chimp = remove_ending_dashes(longer_human), remove_ending_dashes(longer_chimp)
+
+		print key
+		print longer_human, len_without_dashes(longer_human), len(longer_human)
+		print longer_chimp, len_without_dashes(longer_chimp), len(longer_chimp)
+
+		if key == "2xHAR.282":
+			flag = True
 	return
+
+def remove_ending_dashes(sequence):
+	"""Since in many cases .extend() marches to the left and right at the same time, it is possible
+	to end up with dash characters hanging off one end or the other."""
+	while True:
+		if sequence[0] == "-" or sequence[-1] == "-":
+			if sequence[0] == "-":
+				sequence = sequence[1:]
+			if sequence[-1] == "-":
+				sequence = sequence[:-1]
+		else:
+			return sequence
 
 
 		
