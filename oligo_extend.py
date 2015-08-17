@@ -17,10 +17,14 @@ up during traversal).
 
 
 import random
+import sys
+import getopt
 
+DASH_TOLERANCE = 25 #total number of dashes allowed on one side of the extension
+REPEAT_TOLERANCE = 8
 FILENAME_SHORT = "HAR_information_table.txt"
 FILENAME_LONG = "Extended_HAR_information_table.txt"
-OUTPUT = "test.txt"
+OUTPUT = "final_hars.txt"
 
 # N.B. the following HARs are in the Extended file but not the short file:
 # 2xHAR.521
@@ -35,6 +39,17 @@ OUTPUT = "test.txt"
 ################ HELPERS #################
 ##########################################
 
+def prune(string1, string2):
+	"""Remove any leading or ending dashes common to both strings."""
+	while True:
+		if string1[0] == string2[0] == "-":
+			string1 = string1[1:]
+			string2 = string2[1:]
+		elif string1[-1] == string2[-1] == "-":
+			string1 = string1[:-1]
+			string2 = string2[:-1]
+		else:
+			return string1, string2
 
 
 def harfile_parse(filename):
@@ -62,7 +77,7 @@ def len_without_dashes(string):
 	return counter #, dash_counter
 
 
-def check_repeat(string, repeat_tolerance = 8, check_from = "left"):
+def check_repeat(string, repeat_tolerance = 1000, check_from = "left"):
 	if check_from == "right":
 		string = "".join([i for i in reversed(string)])
 
@@ -71,10 +86,13 @@ def check_repeat(string, repeat_tolerance = 8, check_from = "left"):
 
 	i = 1
 	while i < repeat_tolerance:
-		if string[i] == string[i-1] and not string[i] == "-":
-			pass
-		else:
+		if string[i] == "-":
 			return False
+		else:
+			if string[i] == string[i-1]:
+				pass
+			else:
+				return False
 		i+=1
 	return True
 
@@ -93,76 +111,56 @@ class Oligo(object):
 		self.length = len(self.string)
 		self.longer_string = longer_string
 
-	def extend(self, target_length = 171, repeat_tolerance = 8, escape_chars = {"-" : 1}, gap_tolerance = 100):
-		self.substring_start = self.longer_string.find(self.string)
-		self.substring_end = self.substring_start + self.length
 
-		self.left_string = ""
-		self.right_string = ""
-		extend_left, extend_right = True, True
-		self.extension_left, self.extension_right = 0, 0
-		self.gaps_left, self.gaps_right = 0, 0
+class OligoPair(object):
 
-		error_message = ""
+	def __init__(self, oligo1, oligo2):
+		self.oligo1 = oligo1
+		self.oligo2 = oligo2
+		self.oligos = [oligo1, oligo2]
 
-		#march outward on both sides
-		while len_without_dashes(self.left_string + self.string + self.right_string) < target_length:
-			if extend_left:
-				current_char = self.longer_string[self.substring_start - 1]
-				
-				if not current_char in escape_chars.keys():
-					
-					self.extension_left += 1
-					
-				else:
-					self.gaps_left += 1 #escape_chars[current_char]
-				
-				self.left_string = current_char + self.left_string
-				self.substring_start -= 1
 
-			if len_without_dashes(self.left_string + self.string + self.right_string) == target_length:
+	def extend(self, target_length, gap_tolerance = DASH_TOLERANCE, repeat_tolerance = REPEAT_TOLERANCE, escape_chars = {"-" : 1}):
+		oligo1 = self.oligo1
+		oligo2 = self.oligo2
+		self.error = []
+
+		for oligo in (oligo1, oligo2):
+			oligo.substring_start = oligo.longer_string.find(oligo.string)
+			oligo.substring_end = oligo.substring_start + oligo.length
+
+			oligo.left_string = ""
+			oligo.right_string = ""
+			oligo.extend_left, oligo.extend_right = True, True
+			oligo.extension_left, oligo.extension_right = 0, 0
+			oligo.gaps_left, oligo.gaps_right = 0, 0
+
+		if len_without_dashes(oligo1.string) > target_length:
+			self.error.append(" human oligo already exceeds target ")
+		if len_without_dashes(oligo2.string) > target_length:
+			self.error.append(" chimp oligo already exceeds target ")
+
+		while len_without_dashes(oligo1.left_string + oligo1.string + oligo1.right_string) < target_length or len_without_dashes(oligo2.left_string + oligo2.string + oligo2.right_string) < target_length:
+			if not ((oligo1.extend_left and oligo2.extend_left) or (oligo1.extend_right and oligo2.extend_right)):
+				self.error.append(" no further extension possible ")
 				break
 
-			if extend_right:
-				current_char = self.longer_string[self.substring_end]
-
-				if not current_char in escape_chars.keys():
-					
-					self.extension_right += 1
-				else:
-					self.gaps_right += 1 #escape_chars[current_char]
-
-				self.right_string += current_char
-				self.substring_end += 1
-
-			#check whether repeat condition is violated
-			if extend_left:
-				if self.substring_start == 1:
-					extend_left = False
-					error_message += "reached far left "
-
-				if self.gaps_left < gap_tolerance:
-					extend_left = not check_repeat(self.left_string, repeat_tolerance, "left")
-				else:
-					extend_left = False
-					error_message += "too many gaps on left "
-
-			if extend_right:
-				if self.substring_end == len(self.longer_string) - 1:
-					extend_right = False
-					error_message += "reached far right "
-
-				if self.gaps_left < gap_tolerance:
-					extend_right = not check_repeat(self.right_string, repeat_tolerance, "right")
-				else:
-					extend_right = False
-					error_message += "too many gaps on right "
-
-			if not extend_left and not extend_right:
-				print "No further extension possible"
-				print error_message
-				print self.gaps_left, self.gaps_right
+			if oligo1.extend_left and oligo2.extend_left:
+				current_char_l1 = oligo1.longer_string[oligo1.substring_start - 1]
+				current_char_l2 = oligo2.longer_string[oligo2.substring_start - 1]
 				
+				if not current_char_l1 in escape_chars.keys():
+					oligo1.extension_left += 1
+				else:
+					oligo1.gaps_left += 1 #escape_chars[current_char]
+
+				if not current_char_l2 in escape_chars.keys():
+					oligo2.extension_left += 1
+				else:
+					oligo2.gaps_left += 1
+
+				
+<<<<<<< HEAD
 				self.extended_string = self.left_string + self.string + self.right_string
 				self.extend_left, self.extend_right = False, False
 
@@ -188,24 +186,57 @@ class Oligo(object):
 			pass
 
 		print "further extend", amt_left, amt_right
+=======
+				oligo1.left_string = current_char_l1 + oligo1.left_string
+				oligo1.substring_start -= 1
 
-		new_left_string, new_right_string = "", ""
-		while amt_left:
-			new_left_string = self.longer_string[self.substring_start - 1] + new_left_string
-			amt_left -= 1
-		while amt_right:
-			new_right_string += self.longer_string[self.substring_end]
-			amt_right -= 1
+				oligo2.left_string = current_char_l2 + oligo2.left_string
+				oligo2.substring_start -= 1
 
-		self.extended_string = new_left_string + self.extended_string + new_right_string
+				if oligo1.substring_start == 1:
+					oligo1.extend_left = False
+					self.error.append(" left limit reached in human sequence ")
+				if oligo2.substring_start == 1:
+					oligo2.extend_left = False
+					self.error.append(" left limit reached in chimp sequence ")
 
+				if oligo1.gaps_left > gap_tolerance:
+					oligo1.extend_left = False
+					self.error.append(" too many gaps on left side of human sequence ")
+				if oligo2.gaps_left > gap_tolerance:
+					oligo2.extend_left = False
+					self.error.append(" too many gaps on left side of chimp sequence ")
 
-class OligoPair(object):
+				if check_repeat(oligo1.left_string, REPEAT_TOLERANCE, "left"):
+					oligo1.extend_left = False
+					self.error.append(" repeat on left side of human sequence ")
+				if check_repeat(oligo2.left_string, REPEAT_TOLERANCE, "left"):
+					oligo2.extend_left = False
+					self.error.append(" repeat on left side of chimp sequence ")
 
-	def __init__(self, oligo1, oligo2):
-		self.oligo1 = oligo1
-		self.oligo2 = oligo2
+			if len_without_dashes(oligo1.left_string + oligo1.string + oligo1.right_string) >= target_length and len_without_dashes(oligo2.left_string + oligo2.string + oligo2.right_string) >= target_length:
+				break
+>>>>>>> origin/master
 
+			if oligo1.extend_right and oligo2.extend_right:
+
+				current_char_r1 = oligo1.longer_string[oligo1.substring_end]
+				current_char_r2 = oligo2.longer_string[oligo2.substring_end]
+
+				if not current_char_r1 in escape_chars.keys():
+					oligo1.extension_right += 1
+				else:
+					oligo1.gaps_right += 1 #escape_chars[current_char]
+
+				if not current_char_r2 in escape_chars.keys():
+					oligo2.extension_right += 1
+				else:
+					oligo2.gaps_right += 1
+
+				oligo1.right_string += current_char_r1
+				oligo1.substring_end += 1
+
+<<<<<<< HEAD
 	def paired_extend(self, target_length, flag=False):
 		self.oligo1.extend(target_length)
 		self.oligo2.extend(target_length)
@@ -216,16 +247,36 @@ class OligoPair(object):
 			
 
 		if not len(self.oligo1.extended_string) == len(self.oligo2.extended_string):
+=======
+				oligo2.right_string += current_char_r2
+				oligo2.substring_end += 1
 
-			#establish which is longer
-			diff = len(self.oligo1.extended_string) - len(self.oligo2.extended_string)
+				if oligo1.substring_end == len(oligo1.longer_string):
+					oligo1.extend_right = False
+					self.error.append(" right limit reached in human sequence ")
+				if oligo2.substring_end == len(oligo2.longer_string):
+					oligo2.extend_right = False
+					self.error.append(" right limit reached in chimp sequence ")
+>>>>>>> origin/master
 
-			#need to extend the shorter string on left and right
-			#take into account the number of gaps on each side, as well as whether we are allowed to keep extending to given side
+				if oligo1.gaps_right > gap_tolerance:
+					oligo1.extend_left = False
+					self.error.append(" too many gaps on right side of human sequence ")
+				if oligo2.gaps_right > gap_tolerance:
+					oligo2.extend_left = False
+					self.error.append(" too many gaps on right side of chimp sequence ")
 
-			diff_left = self.oligo1.extension_left - self.oligo2.extension_left
-			diff_right = self.oligo1.extension_right - self.oligo2.extension_right
+				if check_repeat(oligo1.right_string, REPEAT_TOLERANCE, "right"):
+					oligo1.extend_right = False
+					self.error.append(" repeats on right side of human sequence ")
+				if check_repeat(oligo2.right_string, REPEAT_TOLERANCE, "right"):
+					oligo2.extend_right = False
+					self.error.append(" repeats on right side of chimp sequence ")
 
+		oligo1.extended_string = oligo1.left_string + oligo1.string + oligo1.right_string
+		oligo2.extended_string = oligo2.left_string + oligo2.string + oligo2.right_string
+
+<<<<<<< HEAD
 			if diff_left < 0 and diff_right > 0:
 				if diff > 0:
 					#oligo1 is longer. need to shorten on left side
@@ -247,25 +298,32 @@ class OligoPair(object):
 
 			#assert (diff_left > 0 and diff_right > 0) or (diff_left < 0 and diff_right < 0)
 			#assert diff == (self.oligo1.gaps_left - self.oligo2.gaps_left) + (self.oligo1.gaps_right - self.oligo2.gaps_right)
+=======
+		self.error = list(set(self.error))
+		error_msg = "".join(self.error)
+>>>>>>> origin/master
 
-			if diff > 0:
 
-				# oligo1 longer
-				self.oligo2.further_extend(diff_left, diff_right)
-			else:
-				#oligo2 longer
-				self.oligo1.further_extend(-diff_left, -diff_right)
+		return oligo1.extended_string, oligo2.extended_string, error_msg
 
-		return self.oligo1.extended_string, self.oligo2.extended_string
 
-def extend(input_short, input_long, output, target_length):
+def mainloop(input_short, input_long, output, target_length, verbose = True, gap_tolerance = DASH_TOLERANCE, repeat_tolerance = REPEAT_TOLERANCE):
 	shortfile = harfile_parse(FILENAME_SHORT)
 	longfile = harfile_parse(FILENAME_LONG)
 
+<<<<<<< HEAD
 	flag = False
 
 	for key in shortfile.keys():
 		# columns are ordered: HAR name, human coordinates, human length, human seq, chimp coordinates, chimp length, chimp seq
+=======
+	with open(output, 'w') as fo:
+			fo.write("HAR NAME" + '\t' + "HUMAN SEQ" + '\t' + "BP IN SEQ" + "\t" + "TOTAL LEN" + '\t' + "CHIMP SEQ" '\t' + "BP IN SEQ" + "\t" + "TOTAL LEN" + '\t' + "LOG")
+			fo.write('\n')
+
+	for key in shortfile.keys():
+		
+>>>>>>> origin/master
 		humanshort, humanlong = shortfile[key][2], longfile[key][2]
 		chimpshort, chimplong = shortfile[key][5], longfile[key][5]
 
@@ -273,6 +331,7 @@ def extend(input_short, input_long, output, target_length):
 		olig_chimp = Oligo(chimpshort, chimplong)
 
 		olig_pair = OligoPair(olig_human, olig_chimp)
+<<<<<<< HEAD
 		longer_human, longer_chimp = olig_pair.paired_extend(target_length, flag)
 
 		longer_human, longer_chimp = remove_ending_dashes(longer_human), remove_ending_dashes(longer_chimp)
@@ -283,6 +342,22 @@ def extend(input_short, input_long, output, target_length):
 
 		if key == "2xHAR.282":
 			flag = True
+=======
+		longer_human, longer_chimp, error_message = olig_pair.extend(target_length, gap_tolerance, repeat_tolerance)
+
+		longer_human, longer_chimp = prune(longer_human, longer_chimp)
+
+		with open(output, 'a') as fo:
+			fo.write(key + '\t' + longer_human + '\t' + str(len_without_dashes(longer_human)) + '\t' + str(len(longer_human)) + '\t' + longer_chimp + '\t' + str(len_without_dashes(longer_chimp)) + '\t' + str(len(longer_chimp)) + error_message)
+			fo.write('\n')
+
+		if verbose:
+			print key
+			print longer_human, len_without_dashes(longer_human), len(longer_human)
+			print longer_chimp, len_without_dashes(longer_chimp), len(longer_chimp)
+			print error_message
+			print ""
+>>>>>>> origin/master
 	return
 
 def remove_ending_dashes(sequence):
@@ -304,13 +379,51 @@ def remove_ending_dashes(sequence):
 ################## MAIN ##################
 ##########################################
 
+def main(argv):
+	try:
+		opts, args = getopt.getopt(argv, "s:l:o:t:r:g:v:", ["shortfile=", "longfile=", "output=", "targetlenth=", "repeattolerance=", "gaptolerance=", "verbose="])
 
+		target_length = 171
+		repeattolerance = REPEAT_TOLERANCE
+		gaptolerance = DASH_TOLERANCE
+		verbose = True
+		input_short = FILENAME_SHORT
+		input_long = FILENAME_LONG
+		output = "testfile.txt"
 
-def main(input_short, input_long, output, target_length = 171):
-	extend(input_short, input_long, output, target_length)
+		if opts:
+			for opt, arg in opts:
+				if opt in ("-s", "--shortfile"):
+					input_short = arg
+				elif opt in ("-l", "--longfile"):
+					input_long = arg
+				elif opt in ("-o", "--output"):
+					output = arg
+				elif opt in ("-t", "--targetlength"):
+					target_length = int(arg)
+				elif opt in ("-r", "--repeattolerance"):
+					repeattolerance = int(arg)
+				elif opt in ("-g", "--gaptolerance"):
+					gaptolerance = arg
+				elif opt in ("-v", "--verbose"):
+					verbose = bool(int(arg))
+				else:
+					raise ValueError("Error: unrecognized argument flag!")
+
+		mainloop(input_short, input_long, output, target_length, verbose, gaptolerance, repeattolerance)
+		print "output successful!"
+
+	except getopt.GetoptError:
+		raise ValueError("Error: unrecognized argument flag!")      
+        #usage()                          
+		sys.exit(2)  
+
 
 if __name__ == "__main__":
-	main(FILENAME_SHORT, FILENAME_LONG, OUTPUT)
+	main(sys.argv[1:]) #sys.argv[0] is the name of the script; not useful
+
+# if __name__ == "__main__":
+# 	main(FILENAME_SHORT, FILENAME_LONG, OUTPUT)
 
 	# long_string1, long_string2 = create_string(400), create_string(400)
 	# short_string1, short_string2 = long_string1[100:250], long_string2[100:250]
