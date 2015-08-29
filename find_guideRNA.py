@@ -239,6 +239,7 @@ def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
 #guides = scan_chromosome(fasta_to_chrom_string("C:\Users\Phil\Desktop\Genome\chr1_noN.txt"), 10001, 'chr1_F_guides.txt')
 
 def main(argv):
+	print argv
 	inputfile, chrm_start, outputfile = argv 
 	scan_chromosome_dynamic_bidirection(inputfile, int(chrm_start), outputfile)
 
