@@ -4,6 +4,9 @@ using multiple processing (Pythonic alternative to multithreading)"""
 import find_guideRNA as find
 import multiprocessing
 import itertools
+import time
+
+#Profiling: took 1987s to process chromosomes 21 and 22 (~=33 min, 1.5x faster than multiprocessor)
 
 PATH = "/Users/philnova/Desktop/Human Genome/Complete Chromosomes/Stripped Chromosomes/"
 
@@ -19,9 +22,9 @@ def func_star(a_b):
     """Convert `f([1,2])` to `f(1,2)` call."""
     return worker(*a_b)
 
-def multimulti():
+def multimulti(filename):
 	inputs = []
-	with open('chr_starts.txt') as file:
+	with open(filename) as file:
 		for line in file:
 			inputfile, chrm_start = line.split()[0], int(line.split()[1])
 			inputs.append((inputfile, chrm_start))
@@ -33,4 +36,6 @@ def multimulti():
 
 
 if __name__ == "__main__":
-	multimulti()
+	start = time.time()
+	multimulti('test_starts.txt')
+	print time.time() - start
