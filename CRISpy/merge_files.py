@@ -23,7 +23,7 @@ def worker(filename):
 					fNew.write('\n')
 				else:
 					pass
-	print chrm, ' success! :)'
+	print filename, ' success! :)'
 
 
 def main(path, chromosome_filename, mod = '.txt'):

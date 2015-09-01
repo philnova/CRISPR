@@ -16,7 +16,7 @@ setup(
     description = ("A pure Python module for designing guideRNA sequences for CRISPR gene editing"),
     license = "Open Source",
     keywords = "CRISPR gene RNA biology bioinformatics genetics",
-    url = "",
+    url = "https://github.com/philnova/CRISPR",
     packages=['CRISpy', 'Tests'],
     long_description=read('README'),
     classifiers=[
