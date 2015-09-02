@@ -26,6 +26,26 @@ def worker(filename):
 	print filename, ' success! :)'
 
 
+def worker_test(path, filename, modifier):
+	"""Testing-only version of worker."""
+	with open(PATH+filename+'_mergedguides.txt', 'a') as fNew:
+		with open(path+filename+modifier.replace('.txt','_F.txt'), 'r') as fF:
+			for i, line in enumerate(fF):
+				if i:
+					fNew.write(line.strip() + '\t' + 'F')
+					fNew.write('\n')
+				else:
+					fNew.write(line.strip() + '\t' + 'DIRECTION')
+					fNew.write('\n')
+
+		with open(path+filename+modifier.replace('.txt','_R.txt'), 'r') as fR:
+			for i, line in enumerate(fR):
+				if i:
+					fNew.write(line.strip() + '\t' + 'R')
+					fNew.write('\n')
+				else:
+					pass
+
 def main(path, chromosome_filename, mod = '.txt'):
 	global PATH
 	global modifier
