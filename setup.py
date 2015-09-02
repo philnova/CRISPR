@@ -18,7 +18,7 @@ setup(
     keywords = "CRISPR gene RNA biology bioinformatics genetics",
     url = "https://github.com/philnova/CRISPR",
     packages=['CRISpy', 'Tests'],
-    long_description=read('README'),
+    long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
     ],
