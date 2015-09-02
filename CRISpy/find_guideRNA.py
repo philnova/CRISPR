@@ -180,7 +180,7 @@ def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
 	with open(inputfile, 'r') as fo:
 		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
 			if line_num == 0: #note chromosome number on 0th line
-				chromosome_num = int(line[line.index('r')+1:])
+				chromosome_num = line[line.index('r')+1:].strip()
 			elif line_num in (1,2): #start with a 100bp window
 				chrom_window += line.strip()
 			else:
