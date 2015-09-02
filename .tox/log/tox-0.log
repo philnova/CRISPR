@@ -5,11 +5,9 @@ env: None
 
 running sdist
 running egg_info
-creating CRISpy.egg-info
 writing CRISpy.egg-info/PKG-INFO
 writing top-level names to CRISpy.egg-info/top_level.txt
 writing dependency_links to CRISpy.egg-info/dependency_links.txt
-writing manifest file 'CRISpy.egg-info/SOURCES.txt'
 reading manifest file 'CRISpy.egg-info/SOURCES.txt'
 writing manifest file 'CRISpy.egg-info/SOURCES.txt'
 warning: sdist: standard file not found: should have one of README, README.rst, README.txt
@@ -35,7 +33,6 @@ hard linking CRISpy.egg-info/top_level.txt -> CRISpy-0.0.1/CRISpy.egg-info
 hard linking Tests/__init__.py -> CRISpy-0.0.1/Tests
 hard linking Tests/test_crispy.py -> CRISpy-0.0.1/Tests
 Writing CRISpy-0.0.1/setup.cfg
-creating .tox/dist
 creating '.tox/dist/CRISpy-0.0.1.zip' and adding 'CRISpy-0.0.1' to it
 adding 'CRISpy-0.0.1/PKG-INFO'
 adding 'CRISpy-0.0.1/setup.cfg'

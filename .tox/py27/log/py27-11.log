@@ -1,0 +1,14 @@
+actionid: py27
+msg: installpkg
+cmdargs: [local('/Users/philnova/CRISPR/.tox/py27/bin/pip'), 'install', '-U', '--no-deps', '/Users/philnova/CRISPR/.tox/dist/CRISpy-0.0.1.zip']
+env: {'TERM_PROGRAM_VERSION': '343.7', 'LOGNAME': 'philnova', 'USER': 'philnova', 'PATH': '/Users/philnova/CRISPR/.tox/py27/bin:/Applications/pypy-2.6.0-osx64/bin:/Users/philnova/bowtie2-2.2.5://anaconda/bin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/opt/local/bin:/opt/local/sbin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin', 'HOME': '/Users/philnova', 'PS1': '$ ', 'DISPLAY': '/private/tmp/com.apple.launchd.Xa2BTfMP2D/org.macosforge.xquartz:0', 'TERM_PROGRAM': 'Apple_Terminal', 'LANG': 'en_US.UTF-8', 'TERM': 'xterm-256color', 'Apple_PubSub_Socket_Render': '/private/tmp/com.apple.launchd.i1C0xURpNe/Render', 'SHLVL': '1', 'SECURITYSESSIONID': '186a6', 'XPC_FLAGS': '0x0', 'PYTHONHASHSEED': '2453331340', '_': '//anaconda/bin/tox', 'TERM_SESSION_ID': 'D95F2D89-515A-4D10-85E5-92C412958561', 'XPC_SERVICE_NAME': '0', 'SSH_AUTH_SOCK': '/private/tmp/com.apple.launchd.JByu3r5rs3/Listeners', 'VIRTUAL_ENV': '/Users/philnova/CRISPR/.tox/py27', 'SHELL': '/bin/bash', 'TMPDIR': '/var/folders/cf/w0nh1l7j36g8v56lwwx5_sdm0000gn/T/', 'LSCOLORS': 'ExFxBxDxCxegedabagacad}', 'OLDPWD': '/Users/philnova/CRISPR/Tests', 'CLICOLOR': '1', '__CF_USER_TEXT_ENCODING': '0x1F5:0:0', 'PWD': '/Users/philnova/CRISPR'}
+
+You are using pip version 6.0.6, however version 7.1.2 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+Processing ./.tox/dist/CRISpy-0.0.1.zip
+Installing collected packages: CRISpy
+  Found existing installation: CRISpy 0.0.1
+    Uninstalling CRISpy-0.0.1:
+      Successfully uninstalled CRISpy-0.0.1
+  Running setup.py install for CRISpy
+Successfully installed CRISpy-0.0.1
