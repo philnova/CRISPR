@@ -4,12 +4,19 @@ Test classes for crispy package.
 Run py.test from CRISPR/tests working directory.
 Use --cov argument for test coverage data.
 
-Test coverage (as of 9/2/15) = 61%
+Test coverage (as of 9/3/15) = 83%
 
-name 				  Stmnts	Covered Missed
-/crispy/find_guideRNA     164     99    40%
-/crispy/merge_files        46     27    41%
-/crispy/strip_file         37      4    89%
+--------------- coverage: platform darwin, python 2.7.8-final-0 ----------------
+Name                                          Stmts   Miss  Cover
+-----------------------------------------------------------------
+/Users/philnova/CRISPR/crispy/__init__            0      0   100%
+/users/philnova/CRISPR/crispy/find_guideRNA      99     14    86%
+/users/philnova/CRISPR/crispy/merge_files        46     27    41%
+/users/philnova/CRISPR/crispy/strip_file         37      4    89%
+__init__                                          0      0   100%
+test_crispy                                      86      0   100%
+-----------------------------------------------------------------
+TOTAL                                           268     45    83%
 
 """
 
