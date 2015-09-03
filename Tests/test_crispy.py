@@ -1,6 +1,8 @@
 """
 Test classes for crispy package.
+
 Run py.test from CRISPR/tests working directory.
+Use --cov argument for test coverage data.
 
 Test coverage (as of 9/2/15) = 61%
 
@@ -61,7 +63,7 @@ class TestGenRNA(object):
 	def test_strip_file_IO(self):
 		"""Test that strip_file produces the intermediate edited files."""
 		import strip_file
-		filename, path = ['chrZ',], '/users/philnova/CRISPR/Tests/'
+		filename, path = ['chrZ',], '/users/philnova/CRISPR/tests/'
 		strip_file.main(path, filename)
 		for fname in ['chrz_edited_double_reordered.txt', 'chrz_edited_double.txt','chrz_edited.txt']:
 			assert os.path.isfile(fname)
@@ -110,7 +112,7 @@ class TestGenRNA(object):
 	def test_merge_files_IO(self):
 		"""Test that merge_files creates a new file"""
 		import merge_files
-		path, filename, modifier = '/users/philnova/CRISPR/Tests/', 'out', '.txt'
+		path, filename, modifier = '/users/philnova/CRISPR/tests/', 'out', '.txt'
 		merge_files.worker_test(path, filename, modifier)
 
 	def test_merge_files(self):

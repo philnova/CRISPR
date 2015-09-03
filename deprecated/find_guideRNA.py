@@ -72,6 +72,10 @@ def fasta_to_chrom_string(filename):
 	print("parsing complete")
 	return chrm
 
+def initialize_output_file(outputfile):
+	with open(outputfile, 'w') as fo: #initialize output file
+		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+
 def scan_chromosome_dynamic(inputfile, chrom_start, outputfile):
 	"""Combines scan_chromosome() and fasta_to_chrom_string() into a single function. Scan through
 	chromosome using a 50bp sliding window. Once the window slides beyond a given 50bp line, dump that
@@ -80,8 +84,7 @@ def scan_chromosome_dynamic(inputfile, chrom_start, outputfile):
 	window_start = 0
 	start_positions = {}
 
-	with open(outputfile, 'w') as fo: #initialize output file
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+	initialize_output_file(outputfile)
 
 	with open(inputfile, 'r') as fo:
 		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
@@ -124,8 +127,7 @@ def scan_chromosome_dynamic_revcomp(inputfile, chrom_start, outputfile):
 	window_start = 0
 	start_positions = {}
 
-	with open(outputfile, 'w') as fo: #initialize output file
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+	initialize_output_file(outputfile)
 
 	with open(inputfile, 'r') as fo:
 		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
@@ -172,10 +174,8 @@ def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
 	start_positions_fwd = {}
 	start_positions_rev = {}
 
-	with open(outputfile+'_F.txt', 'w') as fo: #initialize output file
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
-	with open(outputfile+'_R.txt', 'w') as fo: #initialize output file
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+	initialize_output_file(outputfile+'_F.txt')
+	initialize_output_file(outputfile+'_R.txt')
 
 	with open(inputfile, 'r') as fo:
 		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
