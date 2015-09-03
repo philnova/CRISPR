@@ -5,8 +5,10 @@ Summary: A pure Python module for designing guideRNA sequences for CRISPR gene e
 Home-page: https://github.com/philnova/CRISPR
 Author: Phil Nova
 Author-email: pnova8@gmail.com
-License: Open Source
+License: CreativeCommons
 Description: UNKNOWN
 Keywords: CRISPR gene RNA biology bioinformatics genetics
 Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7Intended Audience :: Biologists

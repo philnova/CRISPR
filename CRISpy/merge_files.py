@@ -23,7 +23,7 @@ def worker(filename):
 					fNew.write('\n')
 				else:
 					pass
-	print filename, ' success! :)'
+	print(filename, ' success! :)')
 
 
 def worker_test(path, filename, modifier):

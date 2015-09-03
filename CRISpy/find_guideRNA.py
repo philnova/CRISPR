@@ -63,13 +63,13 @@ def fasta_to_chrom_string(filename):
 		chrm_string = ''
 		for idx, line in enumerate(fo):
 			if not idx%100000:
-				print "parsed "+str(idx)+" lines"
+				print("parsed "+str(idx)+" lines")
 			if line[0] == '>':
 				chrm.append(line)
 			else:
 				chrm_string += line.strip()
 		chrm.append(chrm_string)
-	print "parsing complete"
+	print("parsing complete")
 	return chrm
 
 def scan_chromosome_dynamic(inputfile, chrom_start, outputfile):
@@ -239,7 +239,7 @@ def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
 #guides = scan_chromosome(fasta_to_chrom_string("C:\Users\Phil\Desktop\Genome\chr1_noN.txt"), 10001, 'chr1_F_guides.txt')
 
 def main(argv):
-	print argv
+	print(argv)
 	inputfile, chrm_start, outputfile = argv 
 	scan_chromosome_dynamic_bidirection(inputfile, int(chrm_start), outputfile)
 

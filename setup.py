@@ -12,11 +12,11 @@ with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 
 
 setup(
-    name = "CRISpy",
+    name = "crispy",
     version = "0.0.1",
     author = "Phil Nova",
     author_email = "pnova8@gmail.com",
-    description = ("A pure Python module for designing guideRNA sequences for CRISPR gene editing"),
+    description = ("A pure Python package for designing guideRNA sequences for CRISPR gene editing"),
     license = "CreativeCommons",
     keywords = "CRISPR gene RNA biology bioinformatics genetics",
     url = "https://github.com/philnova/CRISPR",

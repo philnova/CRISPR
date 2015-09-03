@@ -1,7 +1,17 @@
 """
-Test classes for CRISpy package.
-Run py.test from CRISPR/Tests working directory.
+Test classes for crispy package.
+Run py.test from CRISPR/tests working directory.
+
+Test coverage (as of 9/2/15) = 61%
+
+name 				  Stmnts	Covered Missed
+/crispy/find_guideRNA     164     99    40%
+/crispy/merge_files        46     27    41%
+/crispy/strip_file         37      4    89%
+
 """
+
+import crispy
 
 from abc import ABCMeta, abstractmethod
 

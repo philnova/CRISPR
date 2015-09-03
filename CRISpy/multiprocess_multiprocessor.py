@@ -11,12 +11,12 @@ import argparse
 PATH = ''
 
 def worker(inputfile, chrm_start):
-	print inputfile
+	print(inputfile)
 	try:
 		find.scan_chromosome_dynamic_bidirection(PATH+inputfile, chrm_start, PATH+inputfile.replace('.txt', ''))
-		print inputfile + ' success! :)'
+		print(inputfile, ' success! :)')
 	except:
-		print inputfile + ' fail! :('
+		print(inputfile, ' fail! :(')
 
 def func_star(a_b):
     """Convert `f([1,2])` to `f(1,2)` call."""

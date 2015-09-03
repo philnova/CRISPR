@@ -5,6 +5,7 @@ env: None
 
 running sdist
 running egg_info
+writing requirements to CRISpy.egg-info/requires.txt
 writing CRISpy.egg-info/PKG-INFO
 writing top-level names to CRISpy.egg-info/top_level.txt
 writing dependency_links to CRISpy.egg-info/dependency_links.txt
@@ -18,6 +19,7 @@ creating CRISpy-0.0.1/CRISpy
 creating CRISpy-0.0.1/CRISpy.egg-info
 creating CRISpy-0.0.1/Tests
 making hard links in CRISpy-0.0.1...
+hard linking setup.cfg -> CRISpy-0.0.1
 hard linking setup.py -> CRISpy-0.0.1
 hard linking CRISpy/__init__.py -> CRISpy-0.0.1/CRISpy
 hard linking CRISpy/find_guideRNA.py -> CRISpy-0.0.1/CRISpy
@@ -29,9 +31,11 @@ hard linking CRISpy/strip_file.py -> CRISpy-0.0.1/CRISpy
 hard linking CRISpy.egg-info/PKG-INFO -> CRISpy-0.0.1/CRISpy.egg-info
 hard linking CRISpy.egg-info/SOURCES.txt -> CRISpy-0.0.1/CRISpy.egg-info
 hard linking CRISpy.egg-info/dependency_links.txt -> CRISpy-0.0.1/CRISpy.egg-info
+hard linking CRISpy.egg-info/requires.txt -> CRISpy-0.0.1/CRISpy.egg-info
 hard linking CRISpy.egg-info/top_level.txt -> CRISpy-0.0.1/CRISpy.egg-info
 hard linking Tests/__init__.py -> CRISpy-0.0.1/Tests
 hard linking Tests/test_crispy.py -> CRISpy-0.0.1/Tests
+copying setup.cfg -> CRISpy-0.0.1
 Writing CRISpy-0.0.1/setup.cfg
 creating '.tox/dist/CRISpy-0.0.1.zip' and adding 'CRISpy-0.0.1' to it
 adding 'CRISpy-0.0.1/PKG-INFO'
@@ -46,6 +50,7 @@ adding 'CRISpy-0.0.1/CRISpy/multiprocessor.py'
 adding 'CRISpy-0.0.1/CRISpy/strip_file.py'
 adding 'CRISpy-0.0.1/CRISpy.egg-info/dependency_links.txt'
 adding 'CRISpy-0.0.1/CRISpy.egg-info/PKG-INFO'
+adding 'CRISpy-0.0.1/CRISpy.egg-info/requires.txt'
 adding 'CRISpy-0.0.1/CRISpy.egg-info/SOURCES.txt'
 adding 'CRISpy-0.0.1/CRISpy.egg-info/top_level.txt'
 adding 'CRISpy-0.0.1/Tests/__init__.py'

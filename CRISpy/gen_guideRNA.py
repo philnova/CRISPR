@@ -59,27 +59,27 @@ def main():
 			start_sites.append(line.strip().split()[1])
 
 	#step 1: strip files
-	print "STEP 1: STRIP CHROMOSOMES OF STARTING AND LEADING N"
+	print("STEP 1: STRIP CHROMOSOMES OF STARTING AND LEADING N")
 	start = time.time()
 	strip_file.main(path, filenames)
-	print "STEP 1 COMPLETE IN %f SEC" % (time.time() - start)
-	print ''
+	print("STEP 1 COMPLETE IN %f SEC" % (time.time() - start))
+	print('')
 
 	#step 2: generate guide sequences
 	start = time.time()
-	print "STEP 2: GENERATE POTENTIAL GUIDE SEQUENCES"
+	print("STEP 2: GENERATE POTENTIAL GUIDE SEQUENCES")
 	multi.main(start_sites_filename, path, '_edited_double_reordered.txt')
-	print "STEP 2 COMPLETE IN %f SEC" % (time.time() - start)
-	print ''
+	print("STEP 2 COMPLETE IN %f SEC" % (time.time() - start))
+	print('')
 
 	#step 3: merge guide sequences
 	start = time.time()
-	print "STEP 3: MERGE GUIDE SEQUENCES"
+	print("STEP 3: MERGE GUIDE SEQUENCES")
 	merge.main(path, start_sites_filename, '_edited_double_reordered.txt')
-	print "STEP 3 COMPLETE IN %f SEC" % (time.time() - start)
-	print ''
+	print("STEP 3 COMPLETE IN %f SEC" % (time.time() - start))
+	print('')
 
-	print "PROCESS COMPLETE IN %f SEC" % (time.time() - beginning)
+	print("PROCESS COMPLETE IN %f SEC" % (time.time() - beginning))
 
 if __name__ == "__main__":
 	main()
