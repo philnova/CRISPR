@@ -4,19 +4,20 @@ Test classes for crispy package.
 Run py.test from CRISPR/tests working directory.
 Use --cov argument for test coverage data.
 
-Test coverage (as of 9/3/15) = 83%
+Test coverage (as of 9/9/15) = 80%
 
 --------------- coverage: platform darwin, python 2.7.8-final-0 ----------------
-Name                                          Stmts   Miss  Cover
------------------------------------------------------------------
-/Users/philnova/CRISPR/crispy/__init__            0      0   100%
-/users/philnova/CRISPR/crispy/find_guideRNA      99     14    86%
-/users/philnova/CRISPR/crispy/merge_files        46     27    41%
-/users/philnova/CRISPR/crispy/strip_file         37      4    89%
-__init__                                          0      0   100%
-test_crispy                                      86      0   100%
------------------------------------------------------------------
-TOTAL                                           268     45    83%
+Name                                                        Stmts   Miss  Cover
+-------------------------------------------------------------------------------
+/Users/philnova/CRISPR/crispy/__init__                          0      0   100%
+/users/philnova/CRISPR/crispy/find_guideRNA                    99     14    86%
+/users/philnova/CRISPR/crispy/merge_files                      46     27    41%
+/users/philnova/CRISPR/crispy/multiprocess_multiprocessor      33     15    55%
+/users/philnova/CRISPR/crispy/strip_file                       37      4    89%
+__init__                                                        0      0   100%
+test_crispy                                                    79      0   100%
+-------------------------------------------------------------------------------
+TOTAL                                                         294     60    80%
 
 """
 
@@ -38,26 +39,13 @@ import os
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 
 
-def cleanup_mergefiles():
-	"""Clean up files created by test_merge_files_IO"""
-	fname = "out_mergedguides.txt"
+#pare these down to one cleanup function
+#BETTER: DELETE ANY FILE WITH _test.txt SUFFIX
+def cleanup_textfile(fname):
 	if os.path.isfile(fname):
 		os.remove(fname)
 	assert 1==1
 
-def cleanup_scanchrm():
-	"""Clean up files created by test_scanchrm_dynamic_bidirectional_IO"""
-	for fname in ['out_F.txt', 'out_R.txt']:
-		if os.path.isfile(fname):
-			os.remove(fname)
-	assert 1==1
-
-def cleanup_stripfile():
-	"""Clean up files created by test_strip_file_IO"""
-	for fname in ['chrz_edited_double_reordered.txt', 'chrz_edited_double.txt','chrz_edited.txt']:
-		if os.path.isfile(fname):
-			os.remove(fname)
-	assert 1==1
 
 class TestGenRNA(object):
 	"""Assess function of modules that generate potential guide RNA sequences."""
@@ -116,11 +104,14 @@ class TestGenRNA(object):
 					assert l.split()[3].strip() == 'CCATTAAGCCAATCAGCAATGCTG'
 		assert 1==1
 
-	def test_merge_files_IO(self):
+
+
+	def test_merge_files_IO(self): #REPLACE THIS WITH A TEST FOR THE TRUE FUNCTION
 		"""Test that merge_files creates a new file"""
 		import merge_files
 		path, filename, modifier = '/users/philnova/CRISPR/tests/', 'out', '.txt'
 		merge_files.worker_test(path, filename, modifier)
+
 
 	def test_merge_files(self):
 		fname = "out_mergedguides.txt"
@@ -136,11 +127,15 @@ class TestGenRNA(object):
 					assert int(l.split()[2].strip()) == 30
 					assert l.split()[3].strip() == 'CCATTAAGCCAATCAGCAATGCTG'
 
-	def test_cleanup(self):
-		cleanup_mergefiles()
-		cleanup_scanchrm()
-		cleanup_stripfile()
+	def test_multimulti(self):
+		import multiprocess_multiprocessor as mp
+		filename, path, modifier = 'chrm_starts_test.txt', '/users/philnova/CRISPR/tests/', ''
+		mp.main(filename, path, modifier)
 
+	def test_cleanup(self):
+		filenames = ["out_mergedguides", "out_F", "out_R", 'chrz_edited_double_reordered.txt', 'chrz_edited_double.txt','chrz_edited.txt', 'chrZ_F', 'chrZ_R']
+		for fname in filenames:
+			cleanup_textfile(fname)
 
 
 

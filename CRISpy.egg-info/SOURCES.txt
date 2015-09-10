@@ -5,7 +5,6 @@ CRISpy/find_guideRNA.py
 CRISpy/gen_guideRNA.py
 CRISpy/merge_files.py
 CRISpy/multiprocess_multiprocessor.py
-CRISpy/multiprocessor.py
 CRISpy/strip_file.py
 CRISpy.egg-info/PKG-INFO
 CRISpy.egg-info/SOURCES.txt
@@ -19,7 +18,8 @@ crispy/find_guideRNA.py
 crispy/gen_guideRNA.py
 crispy/merge_files.py
 crispy/multiprocess_multiprocessor.py
-crispy/multiprocessor.py
+crispy/score_guide.py
 crispy/strip_file.py
+crispy.egg-info/SOURCES.txt
 tests/__init__.py
 tests/test_crispy.py

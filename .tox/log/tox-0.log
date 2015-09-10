@@ -5,54 +5,54 @@ env: None
 
 running sdist
 running egg_info
-writing requirements to CRISpy.egg-info/requires.txt
-writing CRISpy.egg-info/PKG-INFO
-writing top-level names to CRISpy.egg-info/top_level.txt
-writing dependency_links to CRISpy.egg-info/dependency_links.txt
-reading manifest file 'CRISpy.egg-info/SOURCES.txt'
-writing manifest file 'CRISpy.egg-info/SOURCES.txt'
+writing requirements to crispy.egg-info/requires.txt
+writing crispy.egg-info/PKG-INFO
+writing top-level names to crispy.egg-info/top_level.txt
+writing dependency_links to crispy.egg-info/dependency_links.txt
+reading manifest file 'crispy.egg-info/SOURCES.txt'
+writing manifest file 'crispy.egg-info/SOURCES.txt'
 warning: sdist: standard file not found: should have one of README, README.rst, README.txt
 
 running check
-creating CRISpy-0.0.1
-creating CRISpy-0.0.1/CRISpy
-creating CRISpy-0.0.1/CRISpy.egg-info
-creating CRISpy-0.0.1/Tests
-making hard links in CRISpy-0.0.1...
-hard linking setup.cfg -> CRISpy-0.0.1
-hard linking setup.py -> CRISpy-0.0.1
-hard linking CRISpy/__init__.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/find_guideRNA.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/gen_guideRNA.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/merge_files.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/multiprocess_multiprocessor.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/multiprocessor.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy/strip_file.py -> CRISpy-0.0.1/CRISpy
-hard linking CRISpy.egg-info/PKG-INFO -> CRISpy-0.0.1/CRISpy.egg-info
-hard linking CRISpy.egg-info/SOURCES.txt -> CRISpy-0.0.1/CRISpy.egg-info
-hard linking CRISpy.egg-info/dependency_links.txt -> CRISpy-0.0.1/CRISpy.egg-info
-hard linking CRISpy.egg-info/requires.txt -> CRISpy-0.0.1/CRISpy.egg-info
-hard linking CRISpy.egg-info/top_level.txt -> CRISpy-0.0.1/CRISpy.egg-info
-hard linking Tests/__init__.py -> CRISpy-0.0.1/Tests
-hard linking Tests/test_crispy.py -> CRISpy-0.0.1/Tests
-copying setup.cfg -> CRISpy-0.0.1
-Writing CRISpy-0.0.1/setup.cfg
-creating '.tox/dist/CRISpy-0.0.1.zip' and adding 'CRISpy-0.0.1' to it
-adding 'CRISpy-0.0.1/PKG-INFO'
-adding 'CRISpy-0.0.1/setup.cfg'
-adding 'CRISpy-0.0.1/setup.py'
-adding 'CRISpy-0.0.1/CRISpy/__init__.py'
-adding 'CRISpy-0.0.1/CRISpy/find_guideRNA.py'
-adding 'CRISpy-0.0.1/CRISpy/gen_guideRNA.py'
-adding 'CRISpy-0.0.1/CRISpy/merge_files.py'
-adding 'CRISpy-0.0.1/CRISpy/multiprocess_multiprocessor.py'
-adding 'CRISpy-0.0.1/CRISpy/multiprocessor.py'
-adding 'CRISpy-0.0.1/CRISpy/strip_file.py'
-adding 'CRISpy-0.0.1/CRISpy.egg-info/dependency_links.txt'
-adding 'CRISpy-0.0.1/CRISpy.egg-info/PKG-INFO'
-adding 'CRISpy-0.0.1/CRISpy.egg-info/requires.txt'
-adding 'CRISpy-0.0.1/CRISpy.egg-info/SOURCES.txt'
-adding 'CRISpy-0.0.1/CRISpy.egg-info/top_level.txt'
-adding 'CRISpy-0.0.1/Tests/__init__.py'
-adding 'CRISpy-0.0.1/Tests/test_crispy.py'
-removing 'CRISpy-0.0.1' (and everything under it)
+creating crispy-0.0.1
+creating crispy-0.0.1/CRISpy
+creating crispy-0.0.1/CRISpy.egg-info
+creating crispy-0.0.1/Tests
+making hard links in crispy-0.0.1...
+hard linking setup.cfg -> crispy-0.0.1
+hard linking setup.py -> crispy-0.0.1
+hard linking CRISpy/__init__.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy/find_guideRNA.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy/gen_guideRNA.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy/merge_files.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy/multiprocess_multiprocessor.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy/strip_file.py -> crispy-0.0.1/CRISpy
+hard linking CRISpy.egg-info/PKG-INFO -> crispy-0.0.1/CRISpy.egg-info
+hard linking CRISpy.egg-info/SOURCES.txt -> crispy-0.0.1/CRISpy.egg-info
+hard linking CRISpy.egg-info/dependency_links.txt -> crispy-0.0.1/CRISpy.egg-info
+hard linking CRISpy.egg-info/requires.txt -> crispy-0.0.1/CRISpy.egg-info
+hard linking CRISpy.egg-info/top_level.txt -> crispy-0.0.1/CRISpy.egg-info
+hard linking Tests/__init__.py -> crispy-0.0.1/Tests
+hard linking Tests/test_crispy.py -> crispy-0.0.1/Tests
+hard linking crispy/score_guide.py -> crispy-0.0.1/crispy
+copying setup.cfg -> crispy-0.0.1
+Writing crispy-0.0.1/setup.cfg
+creating '.tox/dist/crispy-0.0.1.zip' and adding 'crispy-0.0.1' to it
+adding 'crispy-0.0.1/PKG-INFO'
+adding 'crispy-0.0.1/setup.cfg'
+adding 'crispy-0.0.1/setup.py'
+adding 'crispy-0.0.1/CRISpy/__init__.py'
+adding 'crispy-0.0.1/CRISpy/find_guideRNA.py'
+adding 'crispy-0.0.1/CRISpy/gen_guideRNA.py'
+adding 'crispy-0.0.1/CRISpy/merge_files.py'
+adding 'crispy-0.0.1/CRISpy/multiprocess_multiprocessor.py'
+adding 'crispy-0.0.1/CRISpy/score_guide.py'
+adding 'crispy-0.0.1/CRISpy/strip_file.py'
+adding 'crispy-0.0.1/CRISpy.egg-info/dependency_links.txt'
+adding 'crispy-0.0.1/CRISpy.egg-info/PKG-INFO'
+adding 'crispy-0.0.1/CRISpy.egg-info/requires.txt'
+adding 'crispy-0.0.1/CRISpy.egg-info/SOURCES.txt'
+adding 'crispy-0.0.1/CRISpy.egg-info/top_level.txt'
+adding 'crispy-0.0.1/Tests/__init__.py'
+adding 'crispy-0.0.1/Tests/test_crispy.py'
+removing 'crispy-0.0.1' (and everything under it)

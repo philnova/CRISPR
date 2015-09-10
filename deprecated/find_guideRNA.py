@@ -26,217 +26,112 @@ class GuideRNA(object):
 	def __str__(self):
 		return str((self.sequence, self.range, self.lowerscore, self.nscore, self.chromosome_num))
 
-def scan_chromosome(chromosome, start_coord, output_file):
+	def write_to_file(self, outputfile):
+		with open(outputfile, 'a') as fi:
+			fi.write('chr'+str(self.chromosome_num)+'\t'+str(self.range[0])+'\t'+str(self.range[1])+'\t'+self.sequence+'\t'+str(self.nscore)+'\t'+str(self.lowerscore)+'\n')
 
-	"""Single forward scan through chromosome. Input chromosome as list of (chromosome number, string) and UCSC absolute starting coordinate.
-	Output list of potential guide RNAs, with each guide represented using a basic class. Also store this information in a tab delimited text file
-	of chromosome number, starting coord, ending coord, sequence, # of uncallable bases in sequence, # of lowercase letters
-	in sequence."""
-	
-	with open(output_file, 'w') as fo:
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
 
-	chromosome_num = int(chromosome[0][chromosome[0].index('r')+1::]) #first line is always ">chr##"
-	chromosome_string = chromosome[1]
-	guide_RNA = []
+class ChromosomeFile(object):
+	def __init__(self, input_filename, start_pos, output_filename):
+		self.inputfile = input_filename
+		self.outputfile = output_filename
+		self.chrom_start = start_pos
+		self.linecounter = 0
+		self.file = open(self.inputfile)
+		self.chromosome_num = ''
+		self.chrom_window = ''
 
-	for char_idx, char in enumerate(chromosome_string): #actual chromosomal content is second item in list
-		if char_idx - 21 >= 0 and char_idx <= len(chromosome_string)-2: #make sure we don't go outside the text
-			if char.upper() == chromosome_string[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
-				try:
-					guide = chromosome_string[char_idx-21:char_idx+2]
-					rna = GuideRNA(guide, start_coord + char_idx - 21, start_coord + char_idx + 1, chromosome_num)
-					guide_RNA.append(rna)
-					with open(output_file, 'a') as fo:
-						fo.write('chr'+str(rna.chromosome_num)+'\t'+str(rna.range[0])+'\t'+str(rna.range[1])+'\t'+rna.sequence+'\t'+str(rna.nscore)+'\t'+str(rna.lowerscore)+'\n')
-					#print GuideRNA(guide, start_coord + char_idx - 21, start_coord + char_idx + 1, chromosome_num)
-				except IndexError:
+	def closefile(self):
+		self.file.close()
+
+	def initialize_output_file(self, filename):
+		with open(filename, 'w') as fo: #initialize output file
+			fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+
+	def forward_scan(self, char, char_idx):
+		if char.upper() == self.chrom_window[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
+			try:
+				guide = self.chrom_window[char_idx-21:char_idx+2]
+
+				if not self.chrom_start + self.window_start + char_idx - 21 in self.start_positions_fwd.keys(): #this helps avoid duplicates
+					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx - 21, self.chrom_start + self.window_start + char_idx + 1, self.chromosome_num)
+					rna.write_to_file(self.outputfile+'_F.txt')
+					self.start_positions_fwd[self.chrom_start+self.window_start+char_idx-21] = True #remember that we already captured this guide
+				else:
 					pass
-	return guide_RNA
 
-def fasta_to_chrom_string(filename):
-	"""Turn fasta file for chromosome into a list of (chromosome number, sequence)
-	Should not be used for very large chromosomes (e.g. Chrm 1) as will cause a
-	memory overflow."""
-	with open(filename, 'r') as fo:
-		chrm = []
-		chrm_string = ''
-		for idx, line in enumerate(fo):
-			if not idx%100000:
-				print("parsed "+str(idx)+" lines")
-			if line[0] == '>':
-				chrm.append(line)
-			else:
-				chrm_string += line.strip()
-		chrm.append(chrm_string)
-	print("parsing complete")
-	return chrm
+			except IndexError: #this seems to happen sometimes, not sure why
+				pass
 
-def initialize_output_file(outputfile):
-	with open(outputfile, 'w') as fo: #initialize output file
-		fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+	def reverse_scan(self, char, char_idx):
+		if char.upper() == self.chrom_window[char_idx+1].upper() == "C": #guide RNA should be 20bp+NGG
+			try:
+				guide = self.chrom_window[char_idx:char_idx+24]
 
-def scan_chromosome_dynamic(inputfile, chrom_start, outputfile):
-	"""Combines scan_chromosome() and fasta_to_chrom_string() into a single function. Scan through
-	chromosome using a 50bp sliding window. Once the window slides beyond a given 50bp line, dump that
-	from memory and advance the window."""
-	chrom_window = "" #initialize cache
-	window_start = 0
-	start_positions = {}
-
-	initialize_output_file(outputfile)
-
-	with open(inputfile, 'r') as fo:
-		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
-			if line_num == 0: #note chromosome number on 0th line
-				chromosome_num = int(line[line.index('r')+1:])
-			elif line_num in (1,2): #start with a 100bp window
-				chrom_window += line.strip()
-			else:
-				if not line_num % 10:
-					start_positions = {} #empty hash table every 10 lines to avoid overflow
-				chrom_window += line.strip() #load the latest line into cache
-
-				#loop through cache and look for guide RNAs
-				for char_idx, char in enumerate(chrom_window[0:-1]):
-					if char_idx >= 21: #make sure we don't try to slice outside the string
-						if char.upper() == chrom_window[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
-
-							try:
-								guide = chrom_window[char_idx-21:char_idx+2]
-
-								if not chrom_start + window_start + char_idx - 21 in start_positions.keys(): #this helps avoid duplicates
-									rna = GuideRNA(guide, chrom_start + window_start + char_idx - 21, chrom_start + window_start + char_idx + 1, chromosome_num)
-									with open(outputfile, 'a') as fi:
-										fi.write('chr'+str(rna.chromosome_num)+'\t'+str(rna.range[0])+'\t'+str(rna.range[1])+'\t'+rna.sequence+'\t'+str(rna.nscore)+'\t'+str(rna.lowerscore)+'\n')
-									start_positions[chrom_start+window_start+char_idx-21] = True #remember that we already captured this guide
-								else:
-									pass
-
-							except IndexError: #this seems to happen sometimes, not sure why
-								pass
-
+				if not self.chrom_start + self.window_start + char_idx in self.start_positions_rev.keys(): #this helps avoid duplicates
+					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx, self.chrom_start + self.window_start + char_idx + 23, self.chromosome_num)
+					rna.write_to_file(self.outputfile+'_R.txt')
+					self.start_positions_rev[self.chrom_start + self.window_start + char_idx] = True #remember that we already captured this guide
 				else:
-					chrom_window = chrom_window[50:] #advance window forward
-					window_start += 50
-					
+					pass
 
-def scan_chromosome_dynamic_revcomp(inputfile, chrom_start, outputfile):
-	"""Reverse complement version of scan_chromosome_dynamic."""
-	chrom_window = "" #initialize cache
-	window_start = 0
-	start_positions = {}
+			except IndexError: #this seems to happen sometimes, not sure why
+				pass
 
-	initialize_output_file(outputfile)
+	def scan_bidirection(self):
+		self.start_positions_fwd = {}
+		self.start_positions_rev = {}
+		self.window_start = 0
 
-	with open(inputfile, 'r') as fo:
-		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
-			if line_num == 0: #note chromosome number on 0th line
-				chromosome_num = int(line[line.index('r')+1:])
-			elif line_num in (1,2): #start with a 100bp window
-				chrom_window += line.strip()
+		self.initialize_output_file(self.outputfile+'_F.txt')
+		self.initialize_output_file(self.outputfile+'_R.txt')
+
+		#first line contains chromosome ID
+		line = self.file.next()
+		self.chromosome_num = line[line.index('r')+1:].strip()
+
+		#load two more lines into the sliding window to initialize
+		line = self.file.next()
+		self.chrom_window += line.strip()
+
+		line = self.file.next()
+		
+		self.linecounter += 3
+
+		while line:
+
+			self.chrom_window += line.strip()
+
+			if not self.linecounter % 10:
+				self.start_positions_fwd = {} #empty cache every 10 lines to avoid overflow
+				self.start_positions_rev = {}
+
+			for char_idx, char in enumerate(self.chrom_window[0:-1]):
+				if char_idx >= 21:
+					self.forward_scan(char, char_idx)
+
+				if char_idx <= 100-24: #make sure we don't try to slice outside the string
+					self.reverse_scan(char, char_idx)
+
 			else:
-				if not line_num % 10:
-					start_positions = {} #empty hash table every 10 lines to avoid overflow
-				chrom_window += line.strip() #load the latest line into cache
-
-				#loop through cache and look for guide RNAs
-				for char_idx, char in enumerate(chrom_window[0:-1]):
-					if char_idx <= 100-24: #make sure we don't try to slice outside the string
-						if char.upper() == chrom_window[char_idx+1].upper() == "C": #guide RNA should be 20bp+NGG
-
-							try:
-								guide = chrom_window[char_idx:char_idx+24]
-
-								if not chrom_start + window_start + char_idx in start_positions.keys(): #this helps avoid duplicates
-									rna = GuideRNA(guide, chrom_start + window_start + char_idx, chrom_start + window_start + char_idx + 23, chromosome_num)
-									with open(outputfile, 'a') as fi:
-										fi.write('chr'+str(rna.chromosome_num)+'\t'+str(rna.range[0])+'\t'+str(rna.range[1])+'\t'+rna.sequence+'\t'+str(rna.nscore)+'\t'+str(rna.lowerscore)+'\n')
-									start_positions[chrom_start + window_start + char_idx] = True #remember that we already captured this guide
-								else:
-									pass
-
-							except IndexError: #this seems to happen sometimes, not sure why
-								pass
-
-				else:
-					chrom_window = chrom_window[50:] #advance window forward
-					window_start += 50
-
-
+				self.chrom_window = self.chrom_window[50:] #advance window forward
+				self.window_start += 50
+				try:
+					line = self.file.next()
+				except StopIteration: #file generator has reached end
+					return
+				self.linecounter += 1
 			
+		self.closefile()	
+	
+
 def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
 	"""Combines scan_chromosome() and fasta_to_chrom_string() into a single function. Scan through
 	chromosome using a 50bp sliding window. Once the window slides beyond a given 50bp line, dump that
 	from memory and advance the window."""
-	chrom_window = "" #initialize cache
-	window_start = 0
-	start_positions_fwd = {}
-	start_positions_rev = {}
+	CF = ChromosomeFile(inputfile, chrom_start, outputfile)
+	CF.scan_bidirection()
 
-	initialize_output_file(outputfile+'_F.txt')
-	initialize_output_file(outputfile+'_R.txt')
-
-	with open(inputfile, 'r') as fo:
-		for line_num, line in enumerate(fo): #enumerate() uses .next() so we do not maintain the whole file object in cache
-			if line_num == 0: #note chromosome number on 0th line
-				chromosome_num = line[line.index('r')+1:].strip()
-			elif line_num in (1,2): #start with a 100bp window
-				chrom_window += line.strip()
-			else:
-				if not line_num % 10:
-					start_positions_fwd = {} #empty hash table every 10 lines to avoid overflow
-					start_positions_rev = {}
-
-				chrom_window += line.strip() #load the latest line into cache
-
-
-				#loop through cache and look for guide RNAs
-				for char_idx, char in enumerate(chrom_window[0:-1]):
-
-					#FORWARD DIRECTION
-					if char_idx >= 21: #make sure we don't try to slice outside the string
-						if char.upper() == chrom_window[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
-
-							try:
-								guide = chrom_window[char_idx-21:char_idx+2]
-
-								if not chrom_start + window_start + char_idx - 21 in start_positions_fwd.keys(): #this helps avoid duplicates
-									rna = GuideRNA(guide, chrom_start + window_start + char_idx - 21, chrom_start + window_start + char_idx + 1, chromosome_num)
-									with open(outputfile+'_F.txt', 'a') as fi:
-										fi.write('chr'+str(rna.chromosome_num)+'\t'+str(rna.range[0])+'\t'+str(rna.range[1])+'\t'+rna.sequence+'\t'+str(rna.nscore)+'\t'+str(rna.lowerscore)+'\n')
-									start_positions_fwd[chrom_start+window_start+char_idx-21] = True #remember that we already captured this guide
-								else:
-									pass
-
-							except IndexError: #this seems to happen sometimes, not sure why
-								pass
-
-					#REVERSE DIRECTION
-					if char_idx <= 100-24: #make sure we don't try to slice outside the string
-						if char.upper() == chrom_window[char_idx+1].upper() == "C": #guide RNA should be 20bp+NGG
-
-							try:
-								guide = chrom_window[char_idx:char_idx+24]
-
-								if not chrom_start + window_start + char_idx in start_positions_rev.keys(): #this helps avoid duplicates
-									rna = GuideRNA(guide, chrom_start + window_start + char_idx, chrom_start + window_start + char_idx + 23, chromosome_num)
-									with open(outputfile+'_R.txt', 'a') as fi:
-										fi.write('chr'+str(rna.chromosome_num)+'\t'+str(rna.range[0])+'\t'+str(rna.range[1])+'\t'+rna.sequence+'\t'+str(rna.nscore)+'\t'+str(rna.lowerscore)+'\n')
-									start_positions_rev[chrom_start + window_start + char_idx] = True #remember that we already captured this guide
-								else:
-									pass
-
-							except IndexError: #this seems to happen sometimes, not sure why
-								pass
-
-				else:
-					chrom_window = chrom_window[50:] #advance window forward
-					window_start += 50
-		
-
-#scan_chromosome_dynamic_bidirection("C:\Users\Phil\Desktop\Genome\chr22_noN.txt", 16050001, 'test')
-#guides = scan_chromosome(fasta_to_chrom_string("C:\Users\Phil\Desktop\Genome\chr1_noN.txt"), 10001, 'chr1_F_guides.txt')
 
 def main(argv):
 	print(argv)

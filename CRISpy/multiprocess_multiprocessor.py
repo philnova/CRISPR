@@ -8,40 +8,37 @@ import argparse
 
 #Profiling: took 1987s to process chromosomes 21 and 22 (~=33 min, 1.5x faster than multiprocessor)
 
-PATH = ''
 
-def worker(inputfile, chrm_start):
+def worker(inputfile, chrm_start, path):
 	print(inputfile)
 	try:
-		find.scan_chromosome_dynamic_bidirection(PATH+inputfile, chrm_start, PATH+inputfile.replace('.txt', ''))
+		find.scan_chromosome_dynamic_bidirection(path+inputfile, chrm_start, path+inputfile.replace('.txt', ''))
 		print(inputfile, ' success! :)')
 	except:
 		print(inputfile, ' fail! :(')
 
-def func_star(a_b):
-    """Convert `f([1,2])` to `f(1,2)` call."""
-    return worker(*a_b)
+def func_star(a_b_c):
+    """Convert `f([1,2,3])` to `f(1,2,3)` call."""
+    return worker(*a_b_c)
 
-def multimulti(filename, name_modifier = '.txt'):
+def multimulti(filename, path, name_modifier = '.txt'):
 	inputs = []
 	with open(filename) as file:
 		for line in file:
 			inputfile, chrm_start = line.split()[0] + name_modifier, int(line.split()[1])
-			inputs.append((inputfile, chrm_start))
+			inputs.append((inputfile, chrm_start, path))
 
-	a_args, b_args = zip(*inputs)
+	a_args, b_args, c_args = zip(*inputs)
 
 	pool = multiprocessing.Pool(multiprocessing.cpu_count()) #limit pool to number of cores
-	pool.map(func_star, itertools.izip(a_args, b_args))
+	pool.map(func_star, itertools.izip(a_args, b_args, c_args))
 
 def main(filename, path, name_modifier = '.txt'):
-	global PATH
-	PATH = path
-	multimulti(filename, name_modifier)
+	multimulti(filename, path, name_modifier)
 	
 
 if __name__ == "__main__":
-
+	#need to fix this for new argument structure
 	PATH = "/Users/philnova/Desktop/Human Genome/Complete Chromosomes/Stripped Chromosomes/"
 	FILENAME = 'test_starts.txt'
 

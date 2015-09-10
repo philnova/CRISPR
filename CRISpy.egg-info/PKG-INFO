@@ -1,7 +1,7 @@
 Metadata-Version: 1.1
-Name: CRISpy
+Name: crispy
 Version: 0.0.1
-Summary: A pure Python module for designing guideRNA sequences for CRISPR gene editing
+Summary: A pure Python package for designing guideRNA sequences for CRISPR gene editing
 Home-page: https://github.com/philnova/CRISPR
 Author: Phil Nova
 Author-email: pnova8@gmail.com

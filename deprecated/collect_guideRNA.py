@@ -1,5 +1,5 @@
 
-import sys, getopt
+import sys, getopt, os
 
 def reverse_complement(dna_string):
 	complement_dict = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C', 'N': 'N', 'n': 'n', 'a': 't', 't':'a', 'c':'g', 'g':'c'}
@@ -32,21 +32,95 @@ class GuideRNA(object):
 
 
 class ChromosomeFile(object):
-	def __init__(self, input_filename, start_pos, output_filename):
-		self.inputfile = input_filename
-		self.outputfile = output_filename
+	def __init__(self, input_filename, start_pos, path = '', output_filename = None, strip_needed = True, cleanup = True):
+		self.inputfile = input_filename + '.txt'
+
+		#by default, outputfile is same name as inputfile
+		if not output_filename:
+			self.outputfile = input_filename
+		else:
+			self.outputfile = output_filename
+
+		self.path = path #path to input and output files
+
+		self.cleanup = cleanup #flag to indicate whether intermediate files should be deleted at end
+
+		#if fasta file for chromosome starts and ends with repetitive N sequences, this option will remove them
+		if strip_needed:
+			self.strip_fasta_file(self.inputfile)
+			self.file = open(self.inputfile.replace('.txt', '_edited_double_reordered.txt'))
+		else:
+			self.file = open(self.inputfile)
+
+		#special attributes for chromosomal scans - should __protect
 		self.chrom_start = start_pos
 		self.linecounter = 0
-		self.file = open(self.inputfile)
 		self.chromosome_num = ''
 		self.chrom_window = ''
+
 
 	def closefile(self):
 		self.file.close()
 
-	def initialize_output_file(self, filename):
+	@staticmethod
+	def initialize_output_file(filename):
 		with open(filename, 'w') as fo: #initialize output file
 			fo.write('CHR#'+'\t'+'START'+'\t'+'STOP'+'\t'+'SEQUENCE'+'\t'+'N_COUNT'+'\t'+'N_LOWERCASE'+'\n')
+
+	def strip_fasta_file(self, filen): #REFACTOR INTO SMALLER FUNCTION PIECES
+		flag = False
+		readfile = open(self.path+filen, 'r')
+		writefile = open(self.path+filen.replace('.txt','_edited.txt'), 'a')
+		for idx, line in enumerate(readfile):
+			if line.strip() == "N"*len(line.strip()) and not flag: #flag lets us leave NNNN in middle of file alone
+				pass
+			else:
+				if idx!=0:
+					flag = True
+				writefile.write(line.strip())
+				writefile.write('\n')
+
+		readfile.close()
+		writefile.close()
+
+
+		#remove repetitive NNNNN from end of file
+		flag = False
+		readfile = open(self.path+filen.replace('.txt','_edited.txt'), 'r')
+		writefile = open(self.path+filen.replace('.txt', '_edited_double.txt'), 'a')
+
+		for line in reversed(readfile.readlines()):
+			if line.strip() == "N"*len(line.strip()) and not flag:
+				pass
+			else:
+				flag = True
+				writefile.write(line.strip())
+				writefile.write('\n')
+
+		readfile.close()
+		writefile.close()
+
+		#undo reversal caused by removing from end
+		readfile = open(self.path+filen.replace('.txt', '_edited_double.txt'), 'r')
+		writefile = open(self.path+filen.replace('.txt', '_edited_double_reordered.txt'), 'a')
+
+		for line in reversed(readfile.readlines()):
+				writefile.write(line.strip())
+				writefile.write('\n')
+
+		readfile.close()
+		writefile.close()
+
+	def delete_file(self, filename):
+		if os.path.isfile(filename):
+			os.remove(filename)
+		else:
+			print(filename, ' not found in directory ', self.path)
+
+	def clean_intermediate_files(self):
+		temp_files = [self.inputfile.replace('.txt', i) for i in ('_edited_double_reordered.txt', '_edited_double.txt', '_edited.txt', '_F.txt', '_R.txt')]
+		for f in temp_files:
+			self.delete_file(f)
 
 	def forward_scan(self, char, char_idx):
 		if char.upper() == self.chrom_window[char_idx+1].upper() == "G": #guide RNA should be 20bp+NGG
@@ -122,23 +196,50 @@ class ChromosomeFile(object):
 					return
 				self.linecounter += 1
 			
-		self.closefile()	
+		self.closefile()
+
+	def filemerge(self):
+		with open(self.path+self.outputfile + '_mergedguides.txt', 'a') as fNew:
+
+			with open(self.path+self.outputfile + '_F.txt', 'r') as fF:
+				#first process forward sequence
+				for i, line in enumerate(fF):
+					if i:
+						fNew.write(line.strip() + '\t' + 'F') #F indicates forward direction
+						fNew.write('\n')
+					else:
+						#add a new field to the first line: direction of the sequence
+						fNew.write(line.strip() + '\t' + 'DIRECTION')
+						fNew.write('\n')
+
+
+			with open(self.path+self.outputfile + '_R.txt', 'r') as fR:
+				#second, process reverse sequence
+				for i, line in enumerate(fR):
+					if i:
+						fNew.write(line.strip() + '\t' + 'R')
+						fNew.write('\n')
+					else:
+						pass #ignore the header from the reverse sequence, as our file already has a header
+
+		if self.cleanup:
+			self.clean_intermediate_files()
 	
 
-def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, outputfile):
+#NEED TO CLEAN UP API FOR FILENAMES
+
+def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, workingdir = ''):
 	"""Combines scan_chromosome() and fasta_to_chrom_string() into a single function. Scan through
 	chromosome using a 50bp sliding window. Once the window slides beyond a given 50bp line, dump that
 	from memory and advance the window."""
-	CF = ChromosomeFile(inputfile, chrom_start, outputfile)
+	CF = ChromosomeFile(inputfile, chrom_start, path = workingdir)
 	CF.scan_bidirection()
+	CF.filemerge()
+	#need way to clean up temporary files
+	#now have a module devoted to a single file -- build multiprocessor for all files
+
+if __name__ == '__main__':
+	scan_chromosome_dynamic_bidirection('chrZ', 1)
 
 
-def main(argv):
-	print(argv)
-	inputfile, chrm_start, outputfile = argv 
-	scan_chromosome_dynamic_bidirection(inputfile, int(chrm_start), outputfile)
-
-if __name__ == "__main__":
-	main(sys.argv[1:]) #first element in argv is the script name; don't want this
-	#command line example: python find_guideRNA.py "C:\Users\Phil\Desktop\Genome\chr1_noN.txt" 10001 'chr1_guides'
 
