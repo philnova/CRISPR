@@ -50,11 +50,12 @@ import scan_one_chromosome as scan1
 import multiprocessing
 import itertools
 import argparse
+import time
 
 def worker(inputfile, chrm_start, path, cleanup, strip):
 	print(inputfile)
 	try:
-		scan1.ChromosomeFile(inputfile, chrm_start, path, strip_needed = strip, cleanup = cleanup, eager = True)
+		cf = scan1.ChromosomeFile(inputfile, chrm_start, path, strip_needed = strip, cleanup = cleanup, eager = True)
 		print(inputfile, ' success! :)')
 	except:
 		print(inputfile, ' fail! :(')
@@ -77,7 +78,7 @@ def main(filename, path, strip, cleanup):
 
 
 if __name__ == "__main__":
-
+	start = time.time()
 	PATH = "/Users/philnova/Desktop/Genome/"
 	FILENAME = 'test_starts.txt'
 
@@ -90,3 +91,5 @@ if __name__ == "__main__":
 	results = parser.parse_args()
 
 	main(results.filename, results.path, results.strip, results.cleanup)
+	end = time.time()
+	print('job finished in',end-start)

@@ -33,6 +33,10 @@ N.B. that workflow items 3 and 4 require that self.openfile() first be called; o
 
 """
 
+#NEED TO FIGURE OUT HOW MUCH DUPLICATION OF SAME GUIDE IS OCCURRING -- IS THIS A BOTTLENECK?
+#RUNNING INTO ERRORS WITH PATH -- make sure it is always called properly!
+#NEED COMMAND LINE SUPPORT
+#REWRITE ENTIRE TEST MODULE
 
 
 import sys, os
@@ -69,15 +73,17 @@ class GuideRNA(object):
 
 class ChromosomeFile(object):
 	def __init__(self, input_filename, start_pos, path = '', output_filename = None, strip_needed = True, cleanup = True, eager = True):
+		self.path = path #path to input and output files
+
 		self.inputfile = input_filename + '.txt'
 
 		#by default, outputfile is same name as inputfile
 		if not output_filename:
-			self.outputfile = input_filename
+			self.outputfile = self.inputfile
 		else:
 			self.outputfile = output_filename
 
-		self.path = path #path to input and output files
+		
 
 		self.cleanup = cleanup #flag to indicate whether intermediate files should be deleted at end
 		self.file = False #makes sure that self.openfile() has been called before self.scan_bidirection()
@@ -101,7 +107,7 @@ class ChromosomeFile(object):
 				self.clean_intermediate_files()
 
 	def openfile(self, filename):
-		self.file = open(filename)
+		self.file = open(self.path + filename)
 
 	def closefile(self):
 		self.file.close()
@@ -156,8 +162,8 @@ class ChromosomeFile(object):
 		writefile.close()
 
 	def delete_file(self, filename):
-		if os.path.isfile(filename):
-			os.remove(filename)
+		if os.path.isfile(self.path+filename):
+			os.remove(self.path+filename)
 		else:
 			print(filename, ' not found in directory ', self.path)
 
@@ -174,7 +180,7 @@ class ChromosomeFile(object):
 
 				if not self.chrom_start + self.window_start + char_idx - 21 in self.start_positions_fwd.keys(): #this helps avoid duplicates
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx - 21, self.chrom_start + self.window_start + char_idx + 1, self.chromosome_num)
-					rna.write_to_file(self.outputfile+'_F.txt')
+					rna.write_to_file(self.path + self.outputfile.replace('.txt','_F.txt'))
 					self.start_positions_fwd[self.chrom_start+self.window_start+char_idx-21] = True #remember that we already captured this guide
 				else:
 					pass
@@ -190,7 +196,7 @@ class ChromosomeFile(object):
 
 				if not self.chrom_start + self.window_start + char_idx in self.start_positions_rev.keys(): #this helps avoid duplicates
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx, self.chrom_start + self.window_start + char_idx + 23, self.chromosome_num)
-					rna.write_to_file(self.outputfile+'_R.txt')
+					rna.write_to_file(self.path + self.outputfile.replace('.txt','_R.txt'))
 					self.start_positions_rev[self.chrom_start + self.window_start + char_idx] = True #remember that we already captured this guide
 				else:
 					pass
@@ -204,8 +210,8 @@ class ChromosomeFile(object):
 		self.start_positions_rev = {}
 		self.window_start = 0
 
-		self.initialize_output_file(self.outputfile+'_F.txt')
-		self.initialize_output_file(self.outputfile+'_R.txt')
+		self.initialize_output_file(self.path + self.outputfile.replace('.txt','_F.txt'))
+		self.initialize_output_file(self.path + self.outputfile.replace('.txt','_R.txt'))
 
 		#first line contains chromosome ID
 		line = self.file.next()
@@ -247,9 +253,9 @@ class ChromosomeFile(object):
 
 	def filemerge(self):
 		assert self.file
-		with open(self.path+self.outputfile + '_mergedguides.txt', 'a') as fNew:
+		with open(self.path+self.outputfile.replace('.txt', '_mergedguides.txt'), 'a') as fNew:
 
-			with open(self.path+self.outputfile + '_F.txt', 'r') as fF:
+			with open(self.path+self.outputfile.replace('.txt','_F.txt'), 'r') as fF:
 				#first process forward sequence
 				for i, line in enumerate(fF):
 					if i:
@@ -261,7 +267,7 @@ class ChromosomeFile(object):
 						fNew.write('\n')
 
 
-			with open(self.path+self.outputfile + '_R.txt', 'r') as fR:
+			with open(self.path+self.outputfile.replace('.txt','_R.txt'), 'r') as fR:
 				#second, process reverse sequence
 				for i, line in enumerate(fR):
 					if i:
@@ -280,7 +286,7 @@ def scan(inputfile, chrom_start, workingdir = ''):
 	#now have a module devoted to a single file -- build multiprocessor for all files
 
 if __name__ == '__main__':
-	pass
+	ChromosomeFile('chrZ', 1, '/Users/philnova/CRISPR/tests/', strip_needed = True, cleanup = True)
 
 
 
