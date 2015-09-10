@@ -272,17 +272,15 @@ class ChromosomeFile(object):
 
 	
 
-def scan_chromosome_dynamic_bidirection(inputfile, chrom_start, workingdir = ''):
-	"""Combines scan_chromosome() and fasta_to_chrom_string() into a single function. Scan through
-	chromosome using a 50bp sliding window. Once the window slides beyond a given 50bp line, dump that
-	from memory and advance the window."""
+def scan(inputfile, chrom_start, workingdir = ''):
+	"""Helper function to construct ChromosomeFile object with default arguments"""
 	CF = ChromosomeFile(inputfile, chrom_start, path = workingdir)
 	
 	#need way to clean up temporary files
 	#now have a module devoted to a single file -- build multiprocessor for all files
 
 if __name__ == '__main__':
-	scan_chromosome_dynamic_bidirection('chrZ', 1)
+	pass
 
 
 
