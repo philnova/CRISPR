@@ -33,8 +33,6 @@ N.B. that workflow items 3 and 4 require that self.openfile() first be called; o
 
 """
 
-#NEED TO FIGURE OUT HOW MUCH DUPLICATION OF SAME GUIDE IS OCCURRING -- IS THIS A BOTTLENECK?
-#RUNNING INTO ERRORS WITH PATH -- make sure it is always called properly!
 #NEED COMMAND LINE SUPPORT
 #REWRITE ENTIRE TEST MODULE
 
@@ -182,8 +180,10 @@ class ChromosomeFile(object):
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx - 21, self.chrom_start + self.window_start + char_idx + 1, self.chromosome_num)
 					rna.write_to_file(self.path + self.outputfile.replace('.txt','_F.txt'))
 					self.start_positions_fwd[self.chrom_start+self.window_start+char_idx-21] = True #remember that we already captured this guide
+					#print '\t'+ str(self.chrom_start + self.window_start + char_idx)+ '     ' + guide
 				else:
 					pass
+					#print self.chrom_start + self.window_start + char_idx
 
 			except IndexError: #this seems to happen sometimes, not sure why
 				pass
@@ -198,8 +198,10 @@ class ChromosomeFile(object):
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx, self.chrom_start + self.window_start + char_idx + 23, self.chromosome_num)
 					rna.write_to_file(self.path + self.outputfile.replace('.txt','_R.txt'))
 					self.start_positions_rev[self.chrom_start + self.window_start + char_idx] = True #remember that we already captured this guide
+					#print '\t'+ str(self.chrom_start + self.window_start + char_idx)
 				else:
 					pass
+					#print self.chrom_start + self.window_start + char_idx
 
 			except IndexError: #this seems to happen sometimes, not sure why
 				pass
@@ -222,6 +224,7 @@ class ChromosomeFile(object):
 		self.chrom_window += line.strip()
 
 		line = self.file.next()
+		self.linelen = len(line.strip())
 		
 		self.linecounter += 3
 
@@ -241,8 +244,8 @@ class ChromosomeFile(object):
 					self.reverse_scan(char, char_idx)
 
 			else:
-				self.chrom_window = self.chrom_window[50:] #advance window forward
-				self.window_start += 50
+				self.chrom_window = self.chrom_window[self.linelen:] #advance window forward
+				self.window_start += self.linelen
 				try:
 					line = self.file.next()
 				except StopIteration: #file generator has reached end
@@ -282,8 +285,6 @@ def scan(inputfile, chrom_start, workingdir = ''):
 	"""Helper function to construct ChromosomeFile object with default arguments"""
 	CF = ChromosomeFile(inputfile, chrom_start, path = workingdir)
 	
-	#need way to clean up temporary files
-	#now have a module devoted to a single file -- build multiprocessor for all files
 
 if __name__ == '__main__':
 	ChromosomeFile('chrZ', 1, '/Users/philnova/CRISPR/tests/', strip_needed = True, cleanup = True)
