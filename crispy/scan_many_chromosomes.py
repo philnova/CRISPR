@@ -55,7 +55,11 @@ import time
 def worker(inputfile, chrm_start, path, cleanup, strip):
 	print(inputfile)
 	try:
-		cf = scan1.ChromosomeFile(inputfile, chrm_start, path, strip_needed = strip, cleanup = cleanup, eager = True)
+		#cf = scan1.ChromosomeFile(inputfile, chrm_start, path, strip_needed = strip, cleanup = cleanup, eager = True)
+		ChromFile = scan1.ChromosomeFile(inputfile, chrm_start, path, strip_needed = strip, cleanup = cleanup, eager = False)
+		with ContextManager(ChromFile):
+			ChromFile.workflow()
+
 		print(inputfile, ' success! :)')
 	except:
 		print(inputfile, ' fail! :(')
@@ -76,20 +80,32 @@ def main(filename, path, strip, cleanup):
 	pool = multiprocessing.Pool(multiprocessing.cpu_count()) #limit pool to number of cores
 	pool.map(worker_splat, itertools.izip(i, ch, p, cl, s))
 
+class ContextManager():
+	"""Allows us to clean up intermediate files even if we exit worker() through a KeyboardInterrupt"""
+	def __init__(self, chromfile):
+		self.chromfile = chromfile
+
+	def __enter__(self):
+		pass
+
+	def __exit__(self, type, value, traceback):
+		"""This method is called by the with statement no matter how we exit"""
+		print("cleaning up after early exit")
+		if self.chromfile.cleanup:
+			self.chromfile.clean_intermediate_files()
+
 
 if __name__ == "__main__":
-	start = time.time()
-	PATH = "/Users/philnova/Desktop/Genome/"
-	FILENAME = 'test_starts.txt'
+	start = time.time() #should use CPU time instead of clock time
 
 	parser = argparse.ArgumentParser(description = "Path to chromosome fasta files and info file")
-	parser.add_argument('-p', action="store", dest="path", type=str, default=PATH)
-	parser.add_argument('-f', action="store", dest="filename", type=str, default=FILENAME)
+	parser.add_argument('-p', action="store", dest="path", type=str, default='')
+	parser.add_argument('-f', action="store", dest="filename", type=str)
 	parser.add_argument('-c', action="store", dest="cleanup", type=bool, default=True)
 	parser.add_argument('-s', action="store", dest="strip", type=bool, default=True)
 
 	results = parser.parse_args()
-
+	
 	main(results.filename, results.path, results.strip, results.cleanup)
 	end = time.time()
 	print('job finished in',end-start)

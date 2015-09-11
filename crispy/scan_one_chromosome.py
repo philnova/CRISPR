@@ -25,9 +25,7 @@ The workflow of ChromosomeFile is:
 	5. If cleanup_needed is set to True, delete all intermediate files using self.clean_intermediate_files()
 
 **If the option eager is set to True, all of these methods will be called as part of ChromosomeFile's constructor.**
-
-If eager is set to False, these methods may be called individually. THIS IS NOT RECOMMENDED as calling methods out of order
-may result in unpredictable errors.
+If eager is set to False, these methods may be called individually. 
 
 N.B. that workflow items 3 and 4 require that self.openfile() first be called; otherwise an assertion error will be thrown.
 
@@ -40,7 +38,6 @@ When run from the command line, the arguments are (required args marked with two
 -o, output_filename (default input_filename) : the prefix for the output : type string
 -x, strip_needed (default True) : whether repretitive NNN needs to be removed from the fasta file : type bool
 -c, cleanup (default True) : whether temporary files should be deleted after scan : type bool
--e, eager (default True) : whether GuideRNA scan should be performed immediately as part of ChromosomeFile's constructor : type bool
 
 
 """
@@ -95,7 +92,7 @@ class ChromosomeFile(object):
 			self.outputfile = output_filename
 
 		
-
+		self.strip = strip_needed #flag to indicate whether chromosome file starts and ends with repetitive NNN that need to be removed
 		self.cleanup = cleanup #flag to indicate whether intermediate files should be deleted at end
 		self.file = False #makes sure that self.openfile() has been called before self.scan_bidirection()
 
@@ -106,8 +103,12 @@ class ChromosomeFile(object):
 		self.chrom_window = ''
 
 		if eager:
-			#if fasta file for chromosome starts and ends with repetitive N sequences, this option will remove them
-			if strip_needed:
+			self.workflow(strip_needed)
+			
+
+	def workflow(self):
+		#if fasta file for chromosome starts and ends with repetitive N sequences, this option will remove them
+			if self.strip:
 				self.strip_fasta_file(self.inputfile)
 				self.openfile(self.inputfile.replace('.txt', '_edited_double_reordered.txt'))
 			else:
@@ -116,6 +117,7 @@ class ChromosomeFile(object):
 			self.filemerge()
 			if self.cleanup:
 				self.clean_intermediate_files()
+
 
 	def openfile(self, filename):
 		self.file = open(self.path + filename)
@@ -292,11 +294,27 @@ class ChromosomeFile(object):
 					else:
 						pass #ignore the header from the reverse sequence, as our file already has a header
 
-	
+
+
 
 def scan(inputfile, chrom_start, workingdir = ''):
 	"""Helper function to construct ChromosomeFile object with default arguments"""
 	CF = ChromosomeFile(inputfile, chrom_start, path = workingdir)
+
+
+class ContextManager():
+	"""Allows us to clean up intermediate files even if we exit worker() through a KeyboardInterrupt"""
+	def __init__(self, chromfile):
+		self.chromfile = chromfile
+
+	def __enter__(self):
+		pass
+
+	def __exit__(self, type, value, traceback):
+		"""This method is called by the with statement no matter how we exit"""
+		print("Cleaning up after early exit")
+		if self.chromfile.cleanup:
+			self.chromfile.clean_intermediate_files()
 	
 
 if __name__ == '__main__':
@@ -308,14 +326,15 @@ if __name__ == '__main__':
 	parser.add_argument('-s', action="store", dest="start_pos", type=int, default=0)
 	parser.add_argument('-p', action="store", dest="path", type=str, default='')
 	parser.add_argument('-o', action="store", dest="output_filename", type=str, default=None)
-	parser.add_argument('-x', action="strip", dest="strip_needed", type=bool, default=True)
-	parser.add_argument('-c', action="strip", dest="cleanup", type=bool, default=True)
-	parser.add_argument('-e', action="strip", dest="eager", type=bool, default=True)
+	parser.add_argument('-x', action="store", dest="strip_needed", type=bool, default=True)
+	parser.add_argument('-c', action="store", dest="cleanup", type=bool, default=True)
 
 	results = parser.parse_args()
 
-	CF = ChromosomeFile(results.input_filename, results.start_pos, results.path, results.output_filename, results.strip_needed, results.cleanup, results.eager)
+	CF = ChromosomeFile(results.input_filename, results.start_pos, results.path, results.output_filename, results.strip_needed, results.cleanup, eager = False)
 
+	with ContextManager(CF):
+		CF.workflow()
 
 
 
