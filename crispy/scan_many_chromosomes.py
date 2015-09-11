@@ -82,7 +82,7 @@ if __name__ == "__main__":
 	PATH = "/Users/philnova/Desktop/Genome/"
 	FILENAME = 'test_starts.txt'
 
-	parser = argparse.ArgumentParser(description = "Path to chromosome files and start sites")
+	parser = argparse.ArgumentParser(description = "Path to chromosome fasta files and info file")
 	parser.add_argument('-p', action="store", dest="path", type=str, default=PATH)
 	parser.add_argument('-f', action="store", dest="filename", type=str, default=FILENAME)
 	parser.add_argument('-c', action="store", dest="cleanup", type=bool, default=True)

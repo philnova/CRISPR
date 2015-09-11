@@ -31,13 +31,26 @@ may result in unpredictable errors.
 
 N.B. that workflow items 3 and 4 require that self.openfile() first be called; otherwise an assertion error will be thrown.
 
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+When run from the command line, the arguments are (required args marked with two stars):
+-i, input_filename (**) : the fasta file to be read : type string
+-s, start_pos (**) : the chromosomal coordinate of the beginning of the chromosome : type int
+-p, path (default current directory) : the path to the input file : type string
+-o, output_filename (default input_filename) : the prefix for the output : type string
+-x, strip_needed (default True) : whether repretitive NNN needs to be removed from the fasta file : type bool
+-c, cleanup (default True) : whether temporary files should be deleted after scan : type bool
+-e, eager (default True) : whether GuideRNA scan should be performed immediately as part of ChromosomeFile's constructor : type bool
+
+
 """
 
-#NEED COMMAND LINE SUPPORT
 #REWRITE ENTIRE TEST MODULE
 
 
-import sys, os
+import sys
+import os
+import argparse
 
 def reverse_complement(dna_string):
 	complement_dict = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C', 'N': 'N', 'n': 'n', 'a': 't', 't':'a', 'c':'g', 'g':'c'}
@@ -287,7 +300,22 @@ def scan(inputfile, chrom_start, workingdir = ''):
 	
 
 if __name__ == '__main__':
-	ChromosomeFile('chrZ', 1, '/Users/philnova/CRISPR/tests/', strip_needed = True, cleanup = True)
+	#(input_filename, start_pos, path = '', output_filename = None, strip_needed = True, cleanup = True, eager = True)
+
+	parser = argparse.ArgumentParser(description = "Configure ChromosomeFile object")
+	
+	parser.add_argument('-i', action="store", dest="input_filename", type=str)
+	parser.add_argument('-s', action="store", dest="start_pos", type=int, default=0)
+	parser.add_argument('-p', action="store", dest="path", type=str, default='')
+	parser.add_argument('-o', action="store", dest="output_filename", type=str, default=None)
+	parser.add_argument('-x', action="strip", dest="strip_needed", type=bool, default=True)
+	parser.add_argument('-c', action="strip", dest="cleanup", type=bool, default=True)
+	parser.add_argument('-e', action="strip", dest="eager", type=bool, default=True)
+
+	results = parser.parse_args()
+
+	CF = ChromosomeFile(results.input_filename, results.start_pos, results.path, results.output_filename, results.strip_needed, results.cleanup, results.eager)
+
 
 
 
