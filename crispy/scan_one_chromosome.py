@@ -43,7 +43,7 @@ When run from the command line, the arguments are (required args marked with two
 """
 
 #REWRITE ENTIRE TEST MODULE
-
+#CONSIDER PROTECTING CLASS ATTRIBUTES
 
 import sys
 import os
@@ -62,7 +62,6 @@ class GuideRNA(object):
 		self.sequence = sequence
 		self.range = (start_coord, end_coord)
 		self.chromosome_num = chromosome_num
-		#assert len(sequence) == end_coord - start_coord
 		self.lowerscore = 0 #number of lower case letters in sequence; proxy for repeat content
 		self.nscore = 0 #number of unidentifiable base pairs in sequence
 		for item_idx, item in enumerate(self.sequence):
@@ -195,10 +194,10 @@ class ChromosomeFile(object):
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx - 21, self.chrom_start + self.window_start + char_idx + 1, self.chromosome_num)
 					rna.write_to_file(self.path + self.outputfile.replace('.txt','_F.txt'))
 					self.start_positions_fwd[self.chrom_start+self.window_start+char_idx-21] = True #remember that we already captured this guide
-					#print '\t'+ str(self.chrom_start + self.window_start + char_idx)+ '     ' + guide
+					#print('\t'+ str(self.chrom_start + self.window_start + char_idx)+ '     ' + guide)
 				else:
 					pass
-					#print self.chrom_start + self.window_start + char_idx
+					#print(self.chrom_start + self.window_start + char_idx)
 
 			except IndexError: #this seems to happen sometimes, not sure why
 				pass
@@ -213,10 +212,10 @@ class ChromosomeFile(object):
 					rna = GuideRNA(guide, self.chrom_start + self.window_start + char_idx, self.chrom_start + self.window_start + char_idx + 23, self.chromosome_num)
 					rna.write_to_file(self.path + self.outputfile.replace('.txt','_R.txt'))
 					self.start_positions_rev[self.chrom_start + self.window_start + char_idx] = True #remember that we already captured this guide
-					#print '\t'+ str(self.chrom_start + self.window_start + char_idx)
+					#print('\t'+ str(self.chrom_start + self.window_start + char_idx))
 				else:
 					pass
-					#print self.chrom_start + self.window_start + char_idx
+					#print(self.chrom_start + self.window_start + char_idx)
 
 			except IndexError: #this seems to happen sometimes, not sure why
 				pass
@@ -318,7 +317,6 @@ class ContextManager():
 	
 
 if __name__ == '__main__':
-	#(input_filename, start_pos, path = '', output_filename = None, strip_needed = True, cleanup = True, eager = True)
 
 	parser = argparse.ArgumentParser(description = "Configure ChromosomeFile object")
 	

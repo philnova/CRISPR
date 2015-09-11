@@ -90,10 +90,9 @@ class ContextManager():
 
 	def __exit__(self, type, value, traceback):
 		"""This method is called by the with statement no matter how we exit"""
-		print("cleaning up after early exit")
+		print("Cleaning up after early exit")
 		if self.chromfile.cleanup:
 			self.chromfile.clean_intermediate_files()
-
 
 if __name__ == "__main__":
 	start = time.time() #should use CPU time instead of clock time
