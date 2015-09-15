@@ -41,6 +41,11 @@ When run from the command line, the arguments are (required args marked with two
 
 
 """
+#Python 2.7/3 compatibility
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 #REWRITE ENTIRE TEST MODULE
 #CONSIDER PROTECTING CLASS ATTRIBUTES

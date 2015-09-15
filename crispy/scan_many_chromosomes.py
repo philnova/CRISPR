@@ -46,11 +46,19 @@ Both default to True
 
 """
 
+#Python2/3 compatibility
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import scan_one_chromosome as scan1
 import multiprocessing
 import itertools
 import argparse
 import time
+
+
 
 def worker(inputfile, chrm_start, path, cleanup, strip):
 	print(inputfile)
@@ -74,6 +82,7 @@ def main(filename, path, strip, cleanup):
 		for line in file:
 			inputfile, chrm_start = line.split()[0], int(line.split()[1])
 			inputs.append((inputfile, chrm_start, path, cleanup, strip))
+			print inputs
 
 	i, ch, p, cl, s = zip(*inputs)
 
